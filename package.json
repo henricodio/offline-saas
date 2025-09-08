@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "offline-saas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/bot/index.js",
+  "scripts": {
+    "start": "node src/bot/index.js",
+    "dev": "nodemon src/bot/index.js",
+    "lint": "echo \"No linter configured\"",
+    "import:clients": "node src/scripts/import_clients_csv.js",
+    "import:products": "node src/scripts/import_products_csv.js",
+    "assign:clients-owner": "node src/scripts/assign_clients_owner.js",
+    "test:bot": "node test-bot.js",
+    "check": "node test-bot.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.4",
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.65.1",
+    "zod": "^3.23.8",
+    "csv-parse": "^5.5.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
