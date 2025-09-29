@@ -31,15 +31,23 @@ function initializeCommandHandler(dependencies) {
 async function handleStartCommand(msg) {
   const errorHandler = createErrorHandler(bot, 'start_command');
   
+  // Paso 1: Registrar/asegurar usuario
   try {
     const user = await ensureUserByTelegram(msg);
     await bot.sendMessage(
       msg.chat.id,
       `¡Bienvenido, ${user.nombre || 'vendedor'}! Tu registro está listo.`
     );
-    await sendMainMenu(msg.chat.id);
   } catch (error) {
-    await errorHandler(error, msg.chat.id, 'Error al iniciar/registrar usuario. Intenta más tarde.');
+    return errorHandler(error, msg.chat.id, 'Error al iniciar/registrar usuario. Intenta más tarde.');
+  }
+
+  // Paso 2: Intentar mostrar menú (errores aquí no deben considerarse fallo de registro)
+  try {
+    await sendMainMenu(msg.chat.id);
+  } catch (e) {
+    logger.warn('start_command_menu', e);
+    await bot.sendMessage(msg.chat.id, 'No se pudo abrir el menú automáticamente. Escribe /menu para continuar.');
   }
 }
 
@@ -52,7 +60,18 @@ async function handleMenuCommand(msg) {
   try {
     await ensureUserByTelegram(msg);
     clearState(msg.chat.id);
-    await sendMainMenu(msg.chat.id);
+    try {
+      await sendMainMenu(msg.chat.id);
+    } catch (e) {
+      logger.warn('menu_command_send', e);
+      const inline_keyboard = [[
+        { text: 'Gestión Cliente', callback_data: 'menu:clients' },
+        { text: 'Nueva Venta', callback_data: 'menu:new_order' }
+      ], [
+        { text: 'Consultar ventas', callback_data: 'sales:view_orders' }
+      ]];
+      await bot.sendMessage(msg.chat.id, 'Menú básico (modo seguro). Algunas opciones pueden no estar disponibles temporalmente.', { reply_markup: { inline_keyboard } });
+    }
   } catch (error) {
     await errorHandler(error, msg.chat.id);
   }
@@ -186,7 +205,7 @@ async function handleNewOrderCommand(msg) {
         total,
         estado: 'pendiente',
         notas: notas?.trim() || null,
-        usuario_responsable_id: usuario.id,
+        usuario_creador_id: usuario.id,
         fecha: new Date().toISOString().slice(0, 10)
       })
       .select('id, total, estado')
@@ -218,6 +237,127 @@ async function handleViewOrdersCommand(msg) {
 }
 
 /**
+ * Comando /kpis - KPIs de los últimos 7 días
+ */
+async function handleKpisCommand(msg, match) {
+  const errorHandler = createErrorHandler(bot, 'kpis_command');
+  try {
+    // Asegurar usuario y obtener su id interno
+    await ensureUserByTelegram(msg);
+    const { data: usuario, error: usrErr } = await supabase
+      .from('users')
+      .select('id')
+      .eq('telegram_id', String(msg.from.id))
+      .single();
+    if (usrErr || !usuario) throw usrErr || new Error('Usuario no encontrado');
+
+    const rawArgs = (msg.text || '').split(' ').slice(1).map(s => s.trim().toLowerCase()).filter(Boolean);
+    const isMonthly = rawArgs.some(a => ['mensual','mes','monthly','month'].includes(a));
+
+    if (!isMonthly) {
+      // Semanal (últimos 7 días)
+      const end = new Date();
+      const start = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const startDate = start.toISOString().slice(0, 10);
+      const endDate = end.toISOString().slice(0, 10);
+
+      const { data: rows, error } = await supabase
+        .from('orders')
+        .select('total, cliente_id')
+        .gte('fecha', startDate)
+        .lte('fecha', endDate)
+        .eq('usuario_creador_id', usuario.id)
+        .limit(5000);
+      if (error) throw error;
+
+      const list = rows || [];
+      const sales_count = list.length;
+      const total_revenue = list.reduce((acc, r) => acc + Number(r.total || 0), 0);
+      const aov = sales_count > 0 ? (total_revenue / sales_count) : 0;
+      const active_clients = new Set(list.map(r => r.cliente_id).filter(Boolean)).size;
+
+      const txt = [
+        'KPIs (últimos 7 días):',
+        `• Ingresos: $${total_revenue.toFixed(2)}`,
+        `• Ventas: ${sales_count}`,
+        `• AOV (ticket medio): $${aov.toFixed(2)}`,
+        `• Clientes activos: ${active_clients}`,
+        '',
+        `Rango: ${startDate} a ${endDate}`,
+        'Tip: usa "/kpis mensual" para ver el mes con YoY.'
+      ].join('\n');
+
+      return bot.sendMessage(msg.chat.id, txt);
+    }
+
+    // Mensual (mes actual) con YoY
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const lastYearMonthStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+    const lastYearNextMonthStart = new Date(now.getFullYear() - 1, now.getMonth() + 1, 1);
+
+    const startDate = monthStart.toISOString().slice(0, 10);
+    const endDate = nextMonthStart.toISOString().slice(0, 10);
+    const startDateLY = lastYearMonthStart.toISOString().slice(0, 10);
+    const endDateLY = lastYearNextMonthStart.toISOString().slice(0, 10);
+
+    const [curRes, lyRes] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('total, cliente_id')
+        .gte('fecha', startDate)
+        .lt('fecha', endDate)
+        .eq('usuario_creador_id', usuario.id)
+        .limit(50000),
+      supabase
+        .from('orders')
+        .select('total, cliente_id')
+        .gte('fecha', startDateLY)
+        .lt('fecha', endDateLY)
+        .eq('usuario_creador_id', usuario.id)
+        .limit(50000)
+    ]);
+    if (curRes.error) throw curRes.error;
+    if (lyRes.error) throw lyRes.error;
+
+    const list = (curRes.data || []);
+    const listLY = (lyRes.data || []);
+
+    const sales_count = list.length;
+    const total_revenue = list.reduce((acc, r) => acc + Number(r.total || 0), 0);
+    const aov = sales_count > 0 ? (total_revenue / sales_count) : 0;
+    const active_clients = new Set(list.map(r => r.cliente_id).filter(Boolean)).size;
+
+    const sales_count_ly = listLY.length;
+    const total_revenue_ly = listLY.reduce((acc, r) => acc + Number(r.total || 0), 0);
+    const aov_ly = sales_count_ly > 0 ? (total_revenue_ly / sales_count_ly) : 0;
+    const active_clients_ly = new Set(listLY.map(r => r.cliente_id).filter(Boolean)).size;
+
+    function pct(curr, prev) {
+      if (!prev || prev === 0) return '—';
+      const p = ((curr - prev) / prev) * 100;
+      return `${p >= 0 ? '+' : ''}${p.toFixed(1)}%`;
+    }
+
+    const txt = [
+      'KPIs (mes actual):',
+      `• Ingresos: $${total_revenue.toFixed(2)} (${pct(total_revenue, total_revenue_ly)} YoY)`,
+      `• Ventas: ${sales_count} (${pct(sales_count, sales_count_ly)} YoY)`,
+      `• AOV: $${aov.toFixed(2)} (${pct(aov, aov_ly)} YoY)`,
+      `• Clientes activos: ${active_clients} (${pct(active_clients, active_clients_ly)} YoY)`,
+      '',
+      `Rango: ${startDate} a ${endDate}`,
+      `Comparación: ${startDateLY} a ${endDateLY}`
+    ].join('\n');
+
+    await bot.sendMessage(msg.chat.id, txt);
+  } catch (error) {
+    await errorHandler(error, msg.chat.id, 'Error al calcular KPIs');
+  }
+}
+
+/**
  * Registrar todos los comandos
  */
 function registerCommands() {
@@ -234,6 +374,7 @@ function registerCommands() {
   
   // Comandos de consulta
   bot.onText(/^\/ver_pedidos(?:@\w+)?$/, handleViewOrdersCommand);
+  bot.onText(/^\/kpis(?:@\w+)?(?:\s+.*)?$/s, handleKpisCommand);
   
   logger.info('commands', 'Comandos registrados exitosamente');
 }
@@ -246,5 +387,6 @@ module.exports = {
   handleHelpCommand,
   handleNewClientCommand,
   handleNewOrderCommand,
-  handleViewOrdersCommand
+  handleViewOrdersCommand,
+  handleKpisCommand
 };

@@ -5,3 +5,13 @@ npm-debug.log*
 .yarn*
 coverage/
 dist/
+
+# Web app env (no subir credenciales del frontend)
+web/.env.local
+
+# Next.js build artifacts
+.next/
+web/.next/
+web/.turbo/
+web/.vercel/
+web/.cache/

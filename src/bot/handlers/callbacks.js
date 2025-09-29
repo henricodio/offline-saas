@@ -3,10 +3,12 @@
  */
 
 const { createCallbackErrorHandler, logger } = require('../utils/errorHandler');
+const { handleKpisCommand } = require('./commands');
 const { 
   getMainMenuKeyboard, 
   getClientsMenuKeyboard, 
   getInventoryMenuKeyboard,
+  getKpisMenuKeyboard,
   buildClientsViewListKeyboard,
   buildClientsEditListKeyboard,
   buildClientsSelectionKeyboard,
@@ -111,6 +113,32 @@ async function handleCallbackQuery(query) {
       await bot.answerCallbackQuery(query.id);
       const fakeMsg = { chat: { id: chatId }, from: query.from };
       return startNewOrderFlow(fakeMsg);
+    }
+
+    // Abrir web (fallback vía mensaje si no se puede usar URL directa en el botón)
+    if (data === 'open:web') {
+      await bot.answerCallbackQuery(query.id);
+      const url = process.env.WEB_BASE_URL || 'http://localhost:3000';
+      return bot.sendMessage(chatId, `Abre la web aquí: ${url}`);
+    }
+    
+    if (data === 'menu:kpis') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      const inline_keyboard = getKpisMenuKeyboard();
+      return bot.sendMessage(chatId, 'KPIs — selecciona un rango:', { reply_markup: { inline_keyboard } });
+    }
+
+    if (data === 'kpis:weekly') {
+      await bot.answerCallbackQuery(query.id);
+      const fakeMsg = { chat: { id: chatId }, from: query.from, text: '/kpis' };
+      return handleKpisCommand(fakeMsg);
+    }
+
+    if (data === 'kpis:monthly') {
+      await bot.answerCallbackQuery(query.id);
+      const fakeMsg = { chat: { id: chatId }, from: query.from, text: '/kpis mensual' };
+      return handleKpisCommand(fakeMsg);
     }
     
     if (data === 'back:main') {

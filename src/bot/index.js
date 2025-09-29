@@ -1021,12 +1021,137 @@ async function clearState(chatId) {
 }
 
 async function sendMainMenu(chatId) {
-  const keyboard = keyboards.getMainMenuKeyboard();
-  
-  return bot.sendMessage(chatId, '¿Qué deseas hacer?', { reply_markup: { inline_keyboard: keyboard } });
+  try {
+    const raw = keyboards.getMainMenuKeyboard();
+    // Saneo de URLs: asegurar esquema http/https en botones URL
+    const inline_keyboard = (raw || []).map((row) =>
+      row.map((btn) => {
+        if (btn && typeof btn.url === 'string') {
+          let u = btn.url.trim();
+          if (!/^https?:\/\//i.test(u)) {
+            u = 'https://' + u;
+          }
+          return { ...btn, url: u };
+        }
+        return btn;
+      })
+    );
+    logger.debug('menu_keyboard', 'Enviando menú principal', { rows: inline_keyboard.length });
+    return await bot.sendMessage(chatId, '¿Qué deseas hacer?', { reply_markup: { inline_keyboard } });
+  } catch (e) {
+    logger.error('send_main_menu', e);
+    throw e;
+  }
 }
 
 // === FUNCIONES DE UTILIDAD ===
+
+// Notifica por Telegram a un usuario según su ID interno (tabla users)
+async function notifyUserById(userId, text) {
+  try {
+    if (!userId) return;
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('telegram_id')
+      .eq('id', userId)
+      .single();
+    if (error) return console.warn('notifyUserById: usuario no encontrado', error?.message);
+    const tgId = user?.telegram_id;
+    if (!tgId) return console.warn('notifyUserById: usuario sin telegram_id');
+    try {
+      await bot.sendMessage(tgId, text);
+    } catch (e) {
+      console.error('notifyUserById bot.sendMessage error:', e?.message || e);
+    }
+  } catch (e) {
+    console.error('notifyUserById error:', e?.message || e);
+  }
+}
+
+// Inicializa suscripciones Realtime a cambios de BD para notificaciones proactivas
+function initializeRealtimeSubscriptions() {
+  try {
+    // Nuevos pedidos: avisar al responsable
+    supabase
+      .channel('realtime-orders-insert')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, async (payload) => {
+        try {
+          const o = payload?.new || {};
+          const orderId = o.id;
+          const total = Number(o.total ?? 0);
+          const clienteId = o.cliente_id;
+          let clienteNombre = null;
+          if (clienteId) {
+            try {
+              const { data: c } = await supabase
+                .from('clients')
+                .select('nombre')
+                .eq('id', clienteId)
+                .single();
+              clienteNombre = c?.nombre || null;
+            } catch (_) { /* noop */ }
+          }
+          const lines = [];
+          lines.push(`🆕 Nuevo pedido #${orderId}`);
+          if (clienteNombre) lines.push(`Cliente: ${clienteNombre}`);
+          lines.push(`Total: $${total.toFixed(2)}`);
+          if (o.estado) lines.push(`Estado: ${o.estado}`);
+          await notifyUserById(o.usuario_creador_id, lines.join('\n'));
+        } catch (e) {
+          console.error('realtime-orders-insert handler error:', e?.message || e);
+        }
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') logger.info('realtime', 'Suscrito a INSERT en orders');
+      });
+
+    // Tareas: crear/actualizar
+    supabase
+      .channel('realtime-tasks-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tasks' }, async (payload) => {
+        try {
+          const t = payload?.new || {};
+          const due = t.due_date ? new Date(t.due_date) : null;
+          let nota = 'Nueva tarea creada';
+          if (due && !isNaN(due.getTime())) {
+            const diffH = (due.getTime() - Date.now()) / 3600000;
+            if (diffH < 0) nota = '⚠️ Tarea creada con fecha vencida';
+            else if (diffH <= 24) nota = '⏰ Tarea próxima a vencer (<24h)';
+          }
+          const text = [
+            `🗒️ ${nota}`,
+            `Título: ${t.title || 'N/D'}`,
+            t.due_date ? `Vence: ${t.due_date}` : null,
+          ].filter(Boolean).join('\n');
+          await notifyUserById(t.user_id, text);
+        } catch (e) {
+          console.error('realtime-tasks insert handler error:', e?.message || e);
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tasks' }, async (payload) => {
+        try {
+          const oldS = (payload?.old?.status || '').toLowerCase();
+          const newS = (payload?.new?.status || '').toLowerCase();
+          if (oldS !== newS && newS === 'completed') {
+            const t = payload?.new || {};
+            const text = [
+              '✅ Tarea completada',
+              `Título: ${t.title || 'N/D'}`,
+              t.due_date ? `Vencimiento: ${t.due_date}` : null,
+            ].filter(Boolean).join('\n');
+            await notifyUserById(t.user_id, text);
+          }
+        } catch (e) {
+          console.error('realtime-tasks update handler error:', e?.message || e);
+        }
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') logger.info('realtime', 'Suscrito a INSERT/UPDATE en tasks');
+      });
+  } catch (e) {
+    console.error('initializeRealtimeSubscriptions error:', e?.message || e);
+  }
+}
 
 function createKeyboard(buttons) {
   return keyboards.getMainMenuKeyboard();
@@ -1181,7 +1306,7 @@ async function handleNewOrderFlow(msg, state) {
         total: state.data.total,
         estado: 'pendiente',
         notas,
-        usuario_responsable_id: user.id,
+        usuario_creador_id: user.id,
         fecha: today
       };
       const { data: order, error } = await supabase
@@ -1438,6 +1563,9 @@ function initializeBot() {
   
   // Registrar comandos
   registerCommands();
+  
+  // Realtime: suscripciones proactivas
+  initializeRealtimeSubscriptions();
   
   // Registrar handlers de eventos
   bot.on('callback_query', handleCallbackQuery);

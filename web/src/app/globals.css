@@ -1,0 +1,337 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Light theme: fondo blanco y primario naranja */
+  --background: oklch(0.99 0 0); /* blanco */
+  --foreground: oklch(0.14 0 0); /* casi negro */
+  --card: oklch(0.995 0 0);
+  --card-foreground: oklch(0.14 0 0);
+  --popover: oklch(0.995 0 0);
+  --popover-foreground: oklch(0.14 0 0);
+  --primary: oklch(0.78 0.18 40); /* naranja brand */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.01 0); /* gris muy claro */
+  --secondary-foreground: oklch(0.28 0.01 0);
+  --muted: oklch(0.95 0.01 0);
+  --muted-foreground: oklch(0.52 0.01 0);
+  --accent: oklch(0.9 0.03 80); /* un azul suave que combina */
+  --accent-foreground: oklch(0.18 0.01 0);
+  --destructive: oklch(0.68 0.2 25); /* rojo */
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.9 0.01 0);
+  --input: oklch(0.93 0.01 0);
+  --ring: var(--primary);
+  --chart-1: oklch(0.78 0.18 40); /* naranja */
+  --chart-2: oklch(0.75 0.12 200); /* azul */
+  --chart-3: oklch(0.82 0.14 80); /* ámbar */
+  --chart-4: oklch(0.7 0.12 160); /* verde-azulado */
+  --chart-5: oklch(0.7 0.15 320); /* magenta */
+  --radius: 0.5rem;
+  --sidebar: oklch(0.99 0 0); /* blanco para sidebar claro */
+  --sidebar-foreground: oklch(0.14 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.95 0.01 0);
+  --sidebar-accent-foreground: oklch(0.28 0.01 0);
+  --sidebar-border: oklch(0.9 0.01 0);
+  --sidebar-ring: var(--primary);
+
+  /* Custom calendar colors */
+  --note-color: oklch(0.9 0.07 80);   /* acorde a acento */
+  --task-color: oklch(0.82 0.14 40);  /* naranja claro */
+  --reminder-color: oklch(0.9 0.06 200); /* azul claro */
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  --background: oklch(0.12 0.01 260);
+  --foreground: oklch(0.95 0.005 85);
+  --card: oklch(0.16 0.01 260);
+  --card-foreground: oklch(0.95 0.005 85);
+  --popover: oklch(0.16 0.01 260);
+  --popover-foreground: oklch(0.95 0.005 85);
+  --primary: oklch(0.72 0.2 40); /* naranja en dark */
+  --primary-foreground: oklch(0.12 0.01 260);
+  --secondary: oklch(0.22 0.01 260);
+  --secondary-foreground: oklch(0.95 0.005 85);
+  --muted: oklch(0.2 0.01 260);
+  --muted-foreground: oklch(0.7 0.02 85);
+  --accent: oklch(0.24 0.02 200);
+  --accent-foreground: oklch(0.95 0.005 85);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.12 0.01 260);
+  --border: oklch(0.26 0.01 260);
+  --input: oklch(0.24 0.01 260);
+  --ring: var(--primary);
+  --chart-1: oklch(0.72 0.2 40);
+  --chart-2: oklch(0.7 0.15 200);
+  --chart-3: oklch(0.68 0.18 320);
+  --chart-4: oklch(0.76 0.12 160);
+  --chart-5: oklch(0.78 0.1 120);
+  --sidebar: oklch(0.14 0.01 260);
+  --sidebar-foreground: oklch(0.95 0.005 85);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.22 0.01 260);
+  --sidebar-accent-foreground: oklch(0.95 0.005 85);
+  --sidebar-border: oklch(0.26 0.01 260);
+  --sidebar-ring: var(--primary);
+
+  /* Custom calendar colors for dark mode */
+  --note-color: oklch(0.62 0.12 200);
+  --task-color: oklch(0.6 0.16 40);
+  --reminder-color: oklch(0.62 0.1 200);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Selección de texto */
+::selection {
+  background: color-mix(in_oklab, var(--primary) 30%, transparent 70%);
+}
+
+/* Scrollbars (WebKit) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: color-mix(in_oklab, var(--background) 90%, black 10%);
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in_oklab, var(--ring) 25%, transparent 75%);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in_oklab, var(--ring) 40%, transparent 60%);
+}
+
+/* Scrollbar (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in_oklab, var(--ring) 30%, transparent 70%) transparent;
+}
+
+/* Headings base */
+h1 { @apply text-3xl sm:text-4xl font-semibold tracking-tight; }
+h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight; }
+h3 { @apply text-xl sm:text-2xl font-medium tracking-tight; }
+h4 { @apply text-lg font-medium; }
+
+/* Enlaces por defecto */
+a { @apply text-[var(--foreground)] underline decoration-[color-mix(in_oklab,_var(--ring)_40%,_transparent_60%)] underline-offset-4 hover:decoration-[var(--ring)]; }
+
+/* Pequeños refinamientos */
+.shadow-elevated { box-shadow: 0 8px 28px color-mix(in_oklab, var(--ring) 14%, transparent 86%); }
+.ring-focus { @apply ring-2 ring-[var(--color-ring)] ring-offset-0; }
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Components */
+.card {
+  @apply bg-[var(--card)] text-[var(--card-foreground)] border border-[var(--border)] rounded-[var(--radius)] shadow-sm;
+}
+
+.btn {
+  @apply inline-flex items-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.btn-sm { @apply h-8 px-3 py-1; }
+.btn-md { @apply h-9 px-4 py-2; }
+.btn-lg { @apply h-11 px-6 py-3; }
+
+.btn-primary {
+  @apply bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-indigo-700;
+}
+
+.btn-ghost {
+  @apply bg-transparent hover:bg-[var(--muted)] text-[var(--foreground)];
+}
+
+/* Botón contorno */
+.btn-outline {
+  @apply border border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-gray-50 dark:hover:bg-[oklch(0.15_0.01_280)];
+}
+
+/* Estados comunes de interacción */
+.btn {
+  @apply transition-all duration-150 ease-out active:scale-[0.98];
+}
+.btn:focus-visible {
+  @apply ring-2 ring-[var(--color-ring)] ring-offset-0;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] px-2.5 py-0.5 text-xs font-medium;
+}
+
+/* Badge variants */
+.badge-success { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300; }
+.badge-warning { @apply bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-300; }
+.badge-info { @apply bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-300; }
+.badge-destructive { @apply bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-300; }
+
+/* Badges por tipo de evento (usa variables del calendario) */
+.badge-note {
+  background-color: var(--note-color);
+  color: white;
+}
+.badge-task {
+  background-color: var(--task-color);
+  color: white;
+}
+.badge-reminder {
+  background-color: var(--reminder-color);
+  color: white;
+}
+.badge-okr {
+  @apply bg-orange-500 text-white;
+}
+
+.table-base {
+  @apply w-full text-sm border border-[var(--border)] rounded-[calc(var(--radius)-2px)] overflow-hidden;
+}
+.table-base thead { @apply bg-[var(--muted)]; }
+.table-base th { @apply font-medium text-[var(--muted-foreground)] px-3 py-2 border-b border-[var(--border)]; text-align: center !important; }
+.table-base td { @apply px-3 py-2 border-b border-[var(--border)]; }
+.table-base tbody tr:hover { @apply bg-indigo-50/40 dark:bg-indigo-950/20; }
+
+/* Sticky header for tables inside overflow-auto wrappers */
+.table-base thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--muted);
+}
+
+/* Zebra rows for readability */
+.table-base tbody tr:nth-child(even) {
+  @apply bg-indigo-50/20 dark:bg-indigo-950/10;
+}
+
+/* Compact table variant */
+.table-compact th { @apply px-2 py-1.5; }
+.table-compact td { @apply px-2 py-1.5; }
+
+/* Chips for active filters */
+.chip { @apply inline-flex items-center gap-2 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] text-xs px-3 py-1; }
+.chip .x { @apply cursor-pointer opacity-70 hover:opacity-100; }
+
+/* Icon-only buttons */
+.icon-btn { @apply inline-flex items-center justify-center h-8 w-8 rounded-md text-[var(--foreground)]/80 hover:bg-[var(--muted)] transition-colors; }
+.icon-btn.destructive { @apply text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20; }
+
+/* App Shell helpers */
+.sidebar {
+  @apply hidden lg:flex flex-col gap-2
+         bg-[color-mix(in_oklab,var(--sidebar)80%,transparent)]/80
+         backdrop-blur-lg text-[var(--sidebar-foreground)]
+         border-r border-[var(--sidebar-border)] shadow-lg;
+}
+.sidebar .nav-link {
+  @apply relative transition-colors px-3 py-2 rounded-md flex items-center gap-3;
+}
+.sidebar .nav-link:hover {
+  @apply bg-[var(--sidebar-accent)]/80;
+}
+.sidebar .nav-link[aria-current="page"] {
+  @apply bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)];
+}
+.dark .sidebar .nav-link[aria-current="page"] {
+  @apply text-white;
+}
+.sidebar .nav-link[aria-current="page"]::before {
+  content: "";
+  @apply absolute left-0 top-0 h-full w-[4px] rounded-r-md;
+  background: var(--sidebar-primary);
+  animation: pulse-indicator 2s ease-in-out infinite;
+}
+@keyframes pulse-indicator {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.topbar {
+  @apply sticky top-0 z-20
+         backdrop-blur-lg
+         bg-[color-mix(in_oklab,var(--background)75%,transparent)]
+         shadow-lg border-b border-[var(--border)]/50;
+}
+
+/* Cards: elevación más notoria al hover */
+.card {
+  @apply transition-all duration-200;
+}
+.card:hover {
+  box-shadow: 0 8px 25px color-mix(in_oklab, var(--ring) 15%, transparent 85%);
+  transform: translateY(-1px);
+}
+
+/* Botones: feedback visual más fuerte */
+.btn {
+  @apply transition-all duration-150 ease-out active:scale-[0.96];
+}
+.btn:hover {
+  box-shadow: 0 2px 8px color-mix(in_oklab, var(--ring) 10%, transparent 90%);
+}
+
+/* Avatares */
+.avatar {
+  @apply inline-flex items-center justify-center rounded-full bg-[var(--muted)] text-[var(--foreground)]/80 text-xs font-semibold w-8 h-8 uppercase;
+}

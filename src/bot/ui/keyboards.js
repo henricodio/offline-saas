@@ -15,6 +15,8 @@ function trunc(str, maxLen) {
  * Teclado del menú principal
  */
 function getMainMenuKeyboard() {
+  const WEB_URL = process.env.WEB_BASE_URL || 'http://localhost:3000';
+  const isHttps = typeof WEB_URL === 'string' && /^https:\/\//i.test(WEB_URL.trim());
   return [
     [
       { text: 'Gestión Cliente', callback_data: 'menu:clients' },
@@ -23,6 +25,27 @@ function getMainMenuKeyboard() {
     [
       { text: 'Consultar ventas', callback_data: 'sales:view_orders' },
       { text: 'Inventario', callback_data: 'menu:inventory' }
+    ],
+    [
+      { text: '📊 KPIs', callback_data: 'menu:kpis' }
+    ],
+    isHttps
+      ? [ { text: '🌐 Abrir Web', url: WEB_URL } ]
+      : [ { text: '🌐 Abrir Web', callback_data: 'open:web' } ]
+  ];
+}
+
+/**
+ * Teclado del submenú de KPIs
+ */
+function getKpisMenuKeyboard() {
+  return [
+    [
+      { text: '📅 Últimos 7 días', callback_data: 'kpis:weekly' },
+      { text: '🗓 Mes actual (YoY)', callback_data: 'kpis:monthly' }
+    ],
+    [
+      { text: '🏠 Menú Principal', callback_data: 'back:main' }
     ]
   ];
 }
@@ -461,6 +484,7 @@ module.exports = {
   getClientsMenuKeyboard,
   getInventoryMenuKeyboard,
   getSalesConsultMenuKeyboard,
+  getKpisMenuKeyboard,
   
   // Listas de clientes
   buildClientsViewListKeyboard,

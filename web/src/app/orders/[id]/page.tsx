@@ -1,0 +1,126 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { supabaseServer } from "@/lib/supabase/server";
+
+type Order = {
+  id: string;
+  fecha: string | null;
+  created_at: string | null;
+  estado: string | null;
+  total: number | null;
+  cliente_id: string;
+  clients?: { id: string; nombre: string | null } | null;
+  short_code?: string | null;
+};
+
+type OrderItem = {
+  id: string;
+  order_id: string;
+  nombre_producto: string | null;
+  precio_unitario: number;
+  cantidad: number;
+  total_linea: number;
+};
+
+function fmtMoney(n: number) {
+  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export default async function OrderDetail({ params }: { params: { id: string } }) {
+  const sb = supabaseServer;
+
+  // Intentar traer short_code si la vista existe
+  let order: Order | null = null;
+  try {
+    const { data, error } = await sb
+      .from("orders_with_short_code")
+      .select("id, fecha, created_at, estado, total, cliente_id, short_code, clients ( id, nombre )")
+      .eq("id", params.id)
+      .single();
+    if (error) throw error;
+    order = data as unknown as Order;
+  } catch {
+    const { data } = await sb
+      .from("orders")
+      .select("id, fecha, created_at, estado, total, cliente_id, clients ( id, nombre )")
+      .eq("id", params.id)
+      .single();
+    order = (data as unknown as Order) ?? null;
+  }
+
+  if (!order) return notFound();
+
+  const { data: items } = await sb
+    .from("order_items")
+    .select("id, order_id, nombre_producto, precio_unitario, cantidad, total_linea")
+    .eq("order_id", params.id)
+    .order("created_at", { ascending: true });
+
+  const lines = (items as OrderItem[]) ?? [];
+
+  return (
+    <main className="max-w-5xl mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Pedido #{order.short_code ?? order.id}</h1>
+        <div className="flex gap-2 text-sm">
+          <Link href="/orders" className="btn btn-ghost btn-sm">Volver</Link>
+          {order.clients?.id ? (
+            <Link href={`/clients/${order.clients.id}`} className="btn btn-ghost btn-sm">Ver cliente</Link>
+          ) : null}
+          <Link href={`/sales/new?fromOrder=${order.id}`} className="btn btn-primary btn-sm">🔁 Repetir</Link>
+        </div>
+      </div>
+
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card p-4">
+          <div className="text-sm text-gray-500">Cliente</div>
+          <div className="text-base">{order.clients?.nombre ?? "-"}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-sm text-gray-500">Fecha</div>
+          <div className="text-base">{order.fecha ?? order.created_at?.slice(0, 10) ?? "-"}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-sm text-gray-500">Estado</div>
+          <div className="text-base">{order.estado ?? "-"}</div>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium">Detalle</h2>
+        {lines.length === 0 ? (
+          <p className="text-sm text-gray-500">Este pedido no tiene ítems.</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="table-base">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th className="text-right">Precio</th>
+                  <th className="text-right">Cant.</th>
+                  <th className="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lines.map((li) => (
+                  <tr key={li.id}>
+                    <td>{li.nombre_producto ?? "-"}</td>
+                    <td className="text-right">${""}{fmtMoney(Number(li.precio_unitario))}</td>
+                    <td className="text-right">{li.cantidad}</td>
+                    <td className="text-right">${""}{fmtMoney(Number(li.total_linea))}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td className="font-medium" colSpan={3}>Total</td>
+                  <td className="text-right font-semibold">${""}{fmtMoney(Number(order.total ?? 0))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}

@@ -1,4 +1,4 @@
-﻿{
+{
     "$schema":  "https://json.schemastore.org/package.json",
     "name":  "offline-saas",
     "version":  "0.1.0",
@@ -25,9 +25,6 @@
     "devDependencies":  {
                             "nodemon":  "^3.1.4"
                         },
-    "repository":  {
-                       "type":  "git",
-                       "url":  null
-                   },
+    "repository": "https://github.com/henricodio/offline-saas.git",
     "license":  "MIT"
 }
