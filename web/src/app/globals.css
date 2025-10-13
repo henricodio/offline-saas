@@ -248,10 +248,26 @@ body {
 .table-base {
   @apply w-full text-sm border border-[var(--border)] rounded-[calc(var(--radius)-2px)] overflow-hidden;
 }
-.table-base thead { @apply bg-[var(--muted)]; }
-.table-base th { @apply font-medium text-[var(--muted-foreground)] px-3 py-2 border-b border-[var(--border)]; text-align: center !important; }
-.table-base td { @apply px-3 py-2 border-b border-[var(--border)]; }
-.table-base tbody tr:hover { @apply bg-indigo-50/40 dark:bg-indigo-950/20; }
+.table-base thead { 
+  @apply bg-gradient-to-b from-[var(--muted)] to-[var(--muted)]/80;
+}
+.table-base th { 
+  @apply font-semibold text-[var(--muted-foreground)] px-3 py-3 border-b-2 border-[var(--border)]; 
+  text-align: center !important; 
+}
+.table-base td { 
+  @apply px-3 py-3 border-b border-[var(--border)]/50; 
+}
+
+/* Hover state mejorado con elevación y transición */
+.table-base tbody tr {
+  @apply transition-all duration-200 ease-out;
+}
+.table-base tbody tr:hover { 
+  @apply bg-gradient-to-r from-indigo-50/60 via-indigo-50/40 to-transparent dark:from-indigo-950/30 dark:via-indigo-950/20 dark:to-transparent;
+  transform: scale(1.005);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
 
 /* Sticky header for tables inside overflow-auto wrappers */
 .table-base thead th {
@@ -259,16 +275,25 @@ body {
   top: 0;
   z-index: 1;
   background: var(--muted);
+  backdrop-filter: blur(8px);
 }
 
-/* Zebra rows for readability */
+/* Zebra rows mejorado con mejor contraste */
 .table-base tbody tr:nth-child(even) {
-  @apply bg-indigo-50/20 dark:bg-indigo-950/10;
+  @apply bg-slate-50/30 dark:bg-slate-950/20;
 }
 
 /* Compact table variant */
-.table-compact th { @apply px-2 py-1.5; }
-.table-compact td { @apply px-2 py-1.5; }
+.table-compact th { @apply px-2 py-2; }
+.table-compact td { @apply px-2 py-2; }
+
+/* Acciones inline en tablas */
+.table-base tbody tr .table-actions {
+  @apply opacity-0 transition-opacity duration-200;
+}
+.table-base tbody tr:hover .table-actions {
+  @apply opacity-100;
+}
 
 /* Chips for active filters */
 .chip { @apply inline-flex items-center gap-2 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] text-xs px-3 py-1; }

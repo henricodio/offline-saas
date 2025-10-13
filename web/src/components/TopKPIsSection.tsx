@@ -187,7 +187,7 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
       {/* Tarjetas de KPIs agregados */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Ventas del periodo */}
-        <div className="card p-4 hover:shadow transition">
+        <div className="card p-4 transform-gpu hover:shadow-md hover:-translate-y-[1px] transition-transform">
           <div className="text-xs text-[var(--muted-foreground)] mb-1">Ventas del {label}</div>
           <div className="flex items-center justify-between">
             <div className="text-2xl font-semibold">${fmtMoney(Number(period.grandTotal || 0))}</div>
@@ -195,7 +195,10 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
               (() => {
                 const { dir, pct } = trend(Number(period.grandTotal || 0), Number(period.grandTotalCompare || 0));
                 return (
-                  <span className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}>
+                  <span
+                    className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}
+                    title={`$${fmtMoney(Number(period.grandTotalCompare || 0))} → $${fmtMoney(Number(period.grandTotal || 0))}`}
+                  >
                     {dir > 0 ? <TrendingUp size={16} /> : dir < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
                     {`${dir === 0 ? '0.0' : Math.abs(pct).toFixed(1)}%`}
                   </span>
@@ -223,7 +226,10 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                   </div>
                   <div className="flex items-center gap-2">
                     {showCompare ? (
-                      <span className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}
+                        title={`$${fmtMoney(Number(prev?.total || 0))} → $${fmtMoney(Number(top.total || 0))} | ${prevShare.toFixed(1)}% → ${share.toFixed(1)}%`}
+                      >
                         {dir > 0 ? <TrendingUp size={16} /> : dir < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
                         {`${dir === 0 ? '0.0' : Math.abs(pct).toFixed(1)}%`}
                       </span>
@@ -258,7 +264,10 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                   </div>
                   <div className="flex items-center gap-2">
                     {showCompare ? (
-                      <span className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}
+                        title={`${productsMetric === 'total' ? `$${fmtMoney(prevValue)}` : `${prevValue} u`} → ${productsMetric === 'total' ? `$${fmtMoney(value)}` : `${value} u`}`}
+                      >
                         {dir > 0 ? <TrendingUp size={16} /> : dir < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
                         {`${dir === 0 ? '0.0' : Math.abs(pct).toFixed(1)}%`}
                       </span>
@@ -293,7 +302,10 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                   </div>
                   <div className="flex items-center gap-2">
                     {showCompare ? (
-                      <span className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 text-sm ${dir > 0 ? 'text-emerald-600' : dir < 0 ? 'text-rose-600' : 'text-[var(--muted-foreground)]'}`}
+                        title={`${prevShare.toFixed(1)}% → ${share.toFixed(1)}%`}
+                      >
                         {dir > 0 ? <TrendingUp size={16} /> : dir < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
                         {`${dir === 0 ? '0.0' : Math.abs(pct).toFixed(1)}%`}
                       </span>
@@ -397,7 +409,7 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                   const linkHref = c.id ? `/clients/${c.id}` : `/clients?q=${encodeURIComponent(c.nombre)}`;
                   const ordersFilteredHref = c.id ? `/orders?client=${encodeURIComponent(c.id)}` : `/orders?client=${encodeURIComponent(c.nombre)}`;
                   return (
-                    <li key={c.id} className="group rounded-md p-2 hover:bg-gradient-to-r from-amber-500/10 to-transparent transition">
+                    <li key={c.id} className="group rounded-md p-2 hover:bg-gradient-to-r from-amber-500/10 to-transparent transition-colors hover:shadow-sm animate__animated animate__fadeIn">
                       <div className="flex items-center justify-between gap-3">
                         <Link href={linkHref} className="font-medium hover:underline">
                           {c.nombre}
@@ -422,7 +434,7 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                       </div>
                       {/* Barra de participación */}
                       <div className="mt-1 h-1.5 rounded bg-[var(--muted)]" role="progressbar" aria-label="Participación cliente" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number(share.toFixed(1))}>
-                        <div className="h-1.5 rounded bg-amber-500/70" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
+                        <div className="h-1.5 rounded bg-gradient-to-r from-amber-500 to-amber-400 transition-[width] duration-500 ease-out" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
                       </div>
                     </li>
                   );
@@ -456,7 +468,7 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                   const linkHref = p.key ? `/products/${p.key}` : `/products?q=${encodeURIComponent(p.nombre)}`;
                   const productsFilteredHref = `/products?q=${encodeURIComponent(p.nombre)}`;
                   return (
-                    <li key={p.key} className="group rounded-md p-2 hover:bg-gradient-to-r from-indigo-500/10 to-transparent transition">
+                    <li key={p.key} className="group rounded-md p-2 hover:bg-gradient-to-r from-indigo-500/10 to-transparent transition-colors hover:shadow-sm animate__animated animate__fadeIn">
                       <div className="flex items-center justify-between gap-3">
                         <Link href={linkHref} className="font-medium hover:underline">
                           {p.nombre}
@@ -483,7 +495,7 @@ export default function TopKPIsSection({ month, year }: { month: PeriodData; yea
                       </div>
                       {/* Barra de participación */}
                       <div className="mt-1 h-1.5 rounded bg-[var(--muted)]" role="progressbar" aria-label="Participación producto" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number(share.toFixed(1))}>
-                        <div className="h-1.5 rounded bg-indigo-500/70" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
+                        <div className="h-1.5 rounded bg-gradient-to-r from-indigo-500 to-indigo-400 transition-[width] duration-500 ease-out" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
                       </div>
                     </li>
                   );

@@ -15,3 +15,10 @@ web/.next/
 web/.turbo/
 web/.vercel/
 web/.cache/
+
+# Playwright / Testing artifacts
+test-results/
+playwright-report/
+web/test-results/
+web/playwright-report/
+web/trace.zip

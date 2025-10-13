@@ -5,7 +5,7 @@ import { pctChange, fmtMoney } from "@/utils/dashboardUtils";
 import TimeSeriesPanel from "@/components/TimeSeriesPanel";
 import BreakdownsPanel from "@/components/BreakdownsPanel";
 import PendingTasksCard from "@/components/PendingTasksCard";
-import { Target, TrendingUp, CheckCircle2, Clock3 } from "lucide-react";
+import { Target, TrendingUp, CheckCircle2, Clock3, Plus, Users, DollarSign, ShoppingCart, Wallet } from "lucide-react";
 
 type OrderRow = {
   id: number;
@@ -379,112 +379,209 @@ export default async function Home({
 
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="toolbar flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <Link href="/tasks" className="btn btn-ghost btn-md">Tareas</Link>
-          <Link href="/mapa" className="btn btn-ghost btn-md">Mapa</Link>
-          <a href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'your_bot_username'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-md">🤖 Abrir bot</a>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500/10 via-indigo-500/10 to-sky-500/10 p-8 border border-orange-500/20 backdrop-blur-sm">
+        {/* Decoración de fondo */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[280px]">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-indigo-600 bg-clip-text text-transparent">
+                Bienvenido a FAKTO 👋
+              </h1>
+              <p className="text-[var(--muted-foreground)] mb-1">
+                Resumen de {new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Periodo: {monthStart} – {monthEnd}
+              </p>
+              
+              <div className="flex flex-wrap gap-3 mt-6">
+                <Link href="/orders" className="btn btn-primary btn-md inline-flex items-center gap-2">
+                  <Target size={16} />
+                  Nuevo Pedido
+                </Link>
+                <Link href="/clients/new" className="btn btn-ghost btn-md inline-flex items-center gap-2">
+                  <Plus size={16} />
+                  Agregar Cliente
+                </Link>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Link href="/tasks" className="btn btn-ghost btn-sm">Tareas</Link>
+              <Link href="/mapa" className="btn btn-ghost btn-sm">Mapa</Link>
+              <a href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'your_bot_username'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">🤖 Bot</a>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="text-xs text-[var(--muted-foreground)]">Mes actual: {monthStart} – {monthEnd}</div>
+      </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Clientes activos del mes</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Actual: ${monthActiveClients} | Mes ant.: ${prevMonthActiveClients} | YoY: ${lastYearActiveClients}`}
-          >
-            {monthActiveClients}
-          </div>
-          {(() => { const pc = pctChange(monthActiveClients, prevMonthActiveClients); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mes anterior</div>
-          ); })()}
-          {(() => { const pc = pctChange(monthActiveClients, lastYearActiveClients); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mismo mes año anterior</div>
-          ); })()}
-          <div className="mt-2">
-            <Link href={`/clients?active=1&from=${monthStart}&to=${monthEnd}` } className="text-xs underline">Ver clientes activos del mes</Link>
-          </div>
-        </div>
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Total ventas del mes</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Actual: $${fmtMoney(monthTotal)} | Mes ant.: $${fmtMoney(prevMonthTotal)} | YoY: $${fmtMoney(monthYoYTotal)}`}
-          >
-            ${""}{fmtMoney(monthTotal)}
-          </div>
-          {(() => { const pc = pctChange(monthTotal, prevMonthTotal); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mes anterior</div>
-          ); })()}
-          {(() => { const pc = pctChange(monthTotal, monthYoYTotal); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mismo mes año anterior</div>
-          ); })()}
-          <div className="mt-2 flex gap-3">
-            <Link href={`/orders?from=${monthStart}&to=${monthEnd}` } className="text-xs underline">Ver pedidos del mes</Link>
-            <a href={`/api/export/monthly?type=orders&from=${monthStart}&to=${monthEnd}`} className="text-xs underline">Descargar CSV</a>
+        {/* Clientes activos del mes */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Clientes activos</div>
+              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Actual: ${monthActiveClients} | Mes ant.: ${prevMonthActiveClients} | YoY: ${lastYearActiveClients}`}
+            >
+              {monthActiveClients}
+            </div>
+            {(() => { const pc = pctChange(monthActiveClients, prevMonthActiveClients); return (
+              <div className={`text-xs ${pc.cls} mb-1`}>{pc.label} vs mes anterior</div>
+            ); })()}
+            {(() => { const pc = pctChange(monthActiveClients, lastYearActiveClients); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs año anterior</div>
+            ); })()}
+            <div className="mt-3 pt-3 border-t border-[var(--border)]">
+              <Link href={`/clients?active=1&from=${monthStart}&to=${monthEnd}`} className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1">
+                Ver detalles →
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Ticket medio del mes</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Actual: $${fmtMoney(monthAvg)} | Mes ant.: $${fmtMoney(prevMonthAvg)} | YoY: $${fmtMoney(lastYearAvg)}`}
-          >
-            ${""}{fmtMoney(monthAvg)}
+
+        {/* Total ventas del mes */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Ventas del mes</div>
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Actual: $${fmtMoney(monthTotal)} | Mes ant.: $${fmtMoney(prevMonthTotal)} | YoY: $${fmtMoney(monthYoYTotal)}`}
+            >
+              ${fmtMoney(monthTotal)}
+            </div>
+            {(() => { const pc = pctChange(monthTotal, prevMonthTotal); return (
+              <div className={`text-xs ${pc.cls} mb-1`}>{pc.label} vs mes anterior</div>
+            ); })()}
+            {(() => { const pc = pctChange(monthTotal, monthYoYTotal); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs año anterior</div>
+            ); })()}
+            <div className="mt-3 pt-3 border-t border-[var(--border)] flex gap-3 text-xs">
+              <Link href={`/orders?from=${monthStart}&to=${monthEnd}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">Ver pedidos</Link>
+              <a href={`/api/export/monthly?type=orders&from=${monthStart}&to=${monthEnd}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">CSV ↓</a>
+            </div>
           </div>
-          {(() => { const pc = pctChange(monthAvg, prevMonthAvg); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mes anterior</div>
-          ); })()}
-          {(() => { const pc = pctChange(monthAvg, lastYearAvg); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mismo mes año anterior</div>
-          ); })()}
+        </div>
+
+        {/* Ticket medio del mes */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Ticket medio</div>
+              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Wallet className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Actual: $${fmtMoney(monthAvg)} | Mes ant.: $${fmtMoney(prevMonthAvg)} | YoY: $${fmtMoney(lastYearAvg)}`}
+            >
+              ${fmtMoney(monthAvg)}
+            </div>
+            {(() => { const pc = pctChange(monthAvg, prevMonthAvg); return (
+              <div className={`text-xs ${pc.cls} mb-1`}>{pc.label} vs mes anterior</div>
+            ); })()}
+            {(() => { const pc = pctChange(monthAvg, lastYearAvg); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs año anterior</div>
+            ); })()}
+          </div>
         </div>
       </section>
 
       {/* KPIs de HOY */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Pedidos hoy</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Ayer: ${ordersYesterday}`}
-          >
-            {ordersToday}
-          </div>
-          {(() => { const pc = pctChange(ordersToday, ordersYesterday); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs ayer</div>
-          ); })()}
-          <div className="mt-2">
-            <Link href={`/orders?from=${todayStart}&to=${tomorrowStart}`} className="text-xs underline">Ver pedidos de hoy</Link>
+        {/* Pedidos hoy */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-sky-500/10 to-blue-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Pedidos hoy</div>
+              <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Ayer: ${ordersYesterday}`}
+            >
+              {ordersToday}
+            </div>
+            {(() => { const pc = pctChange(ordersToday, ordersYesterday); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs ayer</div>
+            ); })()}
+            <div className="mt-3 pt-3 border-t border-[var(--border)]">
+              <Link href={`/orders?from=${todayStart}&to=${tomorrowStart}`} className="text-xs text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1">
+                Ver pedidos →
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Ingresos hoy</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Ayer: $${fmtMoney(totalYesterday)}`}
-          >
-            ${""}{fmtMoney(totalToday)}
+
+        {/* Ingresos hoy */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Ingresos hoy</div>
+              <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Ayer: $${fmtMoney(totalYesterday)}`}
+            >
+              ${fmtMoney(totalToday)}
+            </div>
+            {(() => { const pc = pctChange(totalToday, totalYesterday); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs ayer</div>
+            ); })()}
           </div>
-          {(() => { const pc = pctChange(totalToday, totalYesterday); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs ayer</div>
-          ); })()}
         </div>
-        <div className="card p-4 text-center">
-          <div className="text-sm text-[var(--muted-foreground)]">Clientes nuevos este mes</div>
-          <div
-            className="text-2xl font-semibold text-center"
-            title={`Mes ant.: ${newClientsPrevMonth}`}
-          >
-            {newClientsThisMonth}
+
+        {/* Clientes nuevos este mes */}
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-rose-500/10 to-pink-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm text-[var(--muted-foreground)]">Clientes nuevos</div>
+              <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              </div>
+            </div>
+            <div
+              className="text-3xl font-bold mb-2"
+              title={`Mes ant.: ${newClientsPrevMonth}`}
+            >
+              {newClientsThisMonth}
+            </div>
+            {(() => { const pc = pctChange(newClientsThisMonth, newClientsPrevMonth); return (
+              <div className={`text-xs ${pc.cls}`}>{pc.label} vs mes anterior</div>
+            ); })()}
           </div>
-          {(() => { const pc = pctChange(newClientsThisMonth, newClientsPrevMonth); return (
-            <div className={`text-xs ${pc.cls}`}>{pc.label} vs mes anterior</div>
-          ); })()}
         </div>
       </section>
 

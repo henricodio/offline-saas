@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, ShoppingCart, Users, Package, Calendar, X, Sun, Moon, MapPin } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Calendar, X, Sun, Moon, MapPin, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ComponentType<{ size?: number }>; }) {
@@ -63,17 +63,21 @@ const [open, setOpen] = useState(false);
 
       {/* Mobile drawer */}
       {open ? (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-[80%] max-w-[280px] bg-[var(--sidebar)] p-3 shadow-xl">
-            <button
-              aria-label="Cerrar menú"
-              className="mb-2 inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
-              onClick={() => setOpen(false)}
-            >
-              <X size={16} /> Cerrar
-            </button>
-            {SidebarContent}
+        <div className="fixed inset-0 z-50 lg:hidden animate__animated animate__fadeIn animate__faster">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-[85%] max-w-[320px] bg-[var(--sidebar)] shadow-2xl flex flex-col animate__animated animate__slideInLeft animate__faster">
+            <div className="p-4 border-b border-[var(--sidebar-border)]">
+              <button
+                aria-label="Cerrar menú"
+                className="inline-flex items-center gap-2 text-sm text-[var(--sidebar-foreground)]/80 hover:text-[var(--sidebar-foreground)] transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                <X size={18} /> Cerrar menú
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              {SidebarContent}
+            </div>
           </div>
         </div>
       ) : null}
@@ -86,7 +90,16 @@ const [open, setOpen] = useState(false);
         </div> */}
         <header className="topbar">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            {/* Botón de menú eliminado */}
+            {/* Botón hamburguesa móvil */}
+            <button
+              type="button"
+              className="lg:hidden btn btn-ghost btn-sm"
+              onClick={() => setOpen(true)}
+              aria-label="Abrir menú"
+            >
+              <Menu size={20} />
+            </button>
+            
             <div className="ml-auto flex items-center gap-2">
               <button
                 type="button"

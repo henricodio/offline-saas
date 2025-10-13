@@ -1,0 +1,52 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NODE_ENV: test
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+      NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${{ secrets.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Cleanup E2E data (clients)
+        if: always()
+        run: node scripts/cleanup-e2e-clients.mjs || true
+
+      - name: Cleanup E2E data (products)
+        if: always()
+        run: node scripts/cleanup-e2e-products.mjs || true
+
+      - name: Cleanup E2E data (orders)
+        if: always()
+        run: node scripts/cleanup-e2e-orders.mjs || true

@@ -29,6 +29,18 @@ export default function BreakdownsPanel() {
 
   const [activeTab, setActiveTab] = React.useState<"categories" | "routes" | "cities">("categories");
 
+  // Inicializar estado desde la URL
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const usp = new URLSearchParams(window.location.search);
+    const qFrom = usp.get("from");
+    const qTo = usp.get("to");
+    const qTab = usp.get("tab") as ("categories" | "routes" | "cities" | null);
+    if (qFrom) setFrom(qFrom);
+    if (qTo) setTo(qTo);
+    if (qTab === "categories" || qTab === "routes" || qTab === "cities") setActiveTab(qTab);
+  }, []);
+
   async function fetchData() {
     try {
       setLoading(true);
@@ -48,6 +60,11 @@ export default function BreakdownsPanel() {
   }
 
   React.useEffect(() => {
+    // Si la URL ya especifica from/to, evitamos un fetch inicial redundante
+    if (typeof window !== "undefined") {
+      const usp = new URLSearchParams(window.location.search);
+      if (usp.has("from") || usp.has("to")) return;
+    }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -56,6 +73,17 @@ export default function BreakdownsPanel() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to]);
+
+  // Reflejar estado en la URL
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const usp = new URLSearchParams(window.location.search);
+    usp.set("from", from);
+    usp.set("to", to);
+    usp.set("tab", activeTab);
+    const newUrl = `${window.location.pathname}?${usp.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+  }, [from, to, activeTab]);
 
   const items: Item[] = React.useMemo(() => {
     if (!data) return [];

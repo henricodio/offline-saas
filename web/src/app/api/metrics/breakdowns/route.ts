@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
     const now = new Date();
     const defaultTo = toISODate(now);
-    const defaultFrom = toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30));
+    const defaultFrom = toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90));
     const fromStr = from || defaultFrom;
     const toStr = to || defaultTo;
 
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
       .from("orders")
       .select("id,total,cliente_id")
       .gte("fecha", fromStr)
-      .lt("fecha", toStr)
+      .lte("fecha", toStr)
       .limit(200000);
     if (ordersErr) throw ordersErr;
     const orders: OrderRow[] = (orderRows as OrderRow[]) || [];

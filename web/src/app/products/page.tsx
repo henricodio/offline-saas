@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, Plus } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, Plus, Package } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 
 type Product = {
   id: string;
@@ -196,7 +197,20 @@ export default async function ProductsPage({
       {errMsg ? <p className="text-sm text-orange-600">{errMsg}</p> : null}
 
       {products.length === 0 ? (
-        <p className="text-sm text-gray-500">No se encontraron productos.</p>
+        <EmptyState
+          icon={Package}
+          title="No hay productos"
+          description={q || selectedCategory
+            ? "No se encontraron productos con los filtros aplicados. Intenta con otros criterios de búsqueda."
+            : "Tu catálogo está vacío. Agrega productos para comenzar a gestionar tu inventario y ventas."
+          }
+          action={
+            <Link href="/products/new" className="btn btn-primary btn-md inline-flex items-center gap-2">
+              <Plus size={16} />
+              Agregar Producto
+            </Link>
+          }
+        />
       ) : (
         <div className="overflow-auto">
           <table className="table-base table-compact text-center">
@@ -239,15 +253,15 @@ export default async function ProductsPage({
                   <td className="text-center">{stockBadge(p.stock)}</td>
                   <td className="text-center">{categoryBadge(p.category)}</td>
                   <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1">
-                      <Link href={`/products/${p.id}`} aria-label="Ver" title="Ver" className="btn btn-outline btn-sm">
-                        <Eye size={14} />
+                    <div className="inline-flex items-center gap-1 table-actions">
+                      <Link href={`/products/${p.id}`} aria-label="Ver producto" title="Ver detalles" className="icon-btn">
+                        <Eye size={16} />
                       </Link>
-                      <Link href={`/products/${p.id}/edit`} aria-label="Editar" title="Editar" className="btn btn-outline btn-sm">
-                        <Pencil size={14} />
+                      <Link href={`/products/${p.id}/edit`} aria-label="Editar producto" title="Editar información" className="icon-btn">
+                        <Pencil size={16} />
                       </Link>
-                      <button aria-label="Eliminar" title="Eliminar (requiere permisos)" className="btn btn-outline btn-sm opacity-60 cursor-not-allowed" disabled>
-                        <Trash2 size={14} />
+                      <button aria-label="Eliminar producto" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>

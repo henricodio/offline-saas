@@ -39,17 +39,16 @@ export async function GET(req: Request) {
     const granularity = (url.searchParams.get("granularity") || "day").toLowerCase();
     const allowedGranularity = new Set(["day", "week", "month"]);
     if (!allowedGranularity.has(granularity)) {
-      return NextResponse.json({ error: "invalid granularity" }, { status: 400 });
     }
 
     const hasEnv = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-    // Rango por defecto: últimos 30 días
-    const now = new Date();
-    const defaultTo = toISODate(now);
-    const defaultFrom = toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30));
-    const fromStr = from || defaultFrom;
-    const toStr = to || defaultTo;
+    // Rango por defecto: últimos 90 días
+  const now = new Date();
+  const defaultTo = toISODate(now);
+  const defaultFrom = toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90));
+  const fromStr = from || defaultFrom;
+  const toStr = to || defaultTo;
 
     // Si no hay env, devolvemos datos sintéticos para preview
     if (!hasEnv) {
@@ -79,7 +78,7 @@ export async function GET(req: Request) {
       .from("orders")
       .select("fecha,total,cliente_id")
       .gte("fecha", fromStr)
-      .lt("fecha", toStr)
+      .lte("fecha", toStr)
       .limit(200000);
     if (error) throw error;
 

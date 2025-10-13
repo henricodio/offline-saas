@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, ShoppingCart, Plus } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 
 type OrderRow = {
   id: number;
@@ -267,7 +268,20 @@ export default async function OrdersPage({
         <p className="text-sm text-orange-600">{errMsg}</p>
       ) : null}
       {rows.length === 0 ? (
-        <p className="text-muted-foreground">No hay pedidos para mostrar.</p>
+        <EmptyState
+          icon={ShoppingCart}
+          title="No hay pedidos"
+          description={estadoFilter || clientFilter || fromDate || toDate
+            ? "No se encontraron pedidos con los filtros aplicados. Intenta ajustar los criterios de búsqueda."
+            : "Aún no tienes pedidos registrados. Crea tu primer pedido para comenzar a gestionar tus ventas."
+          }
+          action={
+            <Link href="/orders/new" className="btn btn-primary btn-md inline-flex items-center gap-2">
+              <Plus size={16} />
+              Crear Pedido
+            </Link>
+          }
+        />
       ) : (
         <div className="overflow-auto">
           <table className="table-base table-compact text-center">
@@ -296,15 +310,15 @@ export default async function OrdersPage({
                   <td className="text-center">${""}{Number(o.total ?? 0).toFixed(2)}</td>
                   <td className="text-center">{estadoBadge(o.estado)}</td>
                   <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1">
-                      <Link href={`/orders/${o.id}`} aria-label="Ver" title="Ver" className="icon-btn">
-                        <Eye size={14} />
+                    <div className="inline-flex items-center gap-1 table-actions">
+                      <Link href={`/orders/${o.id}`} aria-label="Ver pedido" title="Ver detalles" className="icon-btn">
+                        <Eye size={16} />
                       </Link>
-                      <Link href={`/orders/${o.id}/edit`} aria-label="Editar" title="Editar" className="icon-btn">
-                        <Pencil size={14} />
+                      <Link href={`/orders/${o.id}/edit`} aria-label="Editar pedido" title="Editar información" className="icon-btn">
+                        <Pencil size={16} />
                       </Link>
-                      <button aria-label="Eliminar" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
-                        <Trash2 size={14} />
+                      <button aria-label="Eliminar pedido" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>

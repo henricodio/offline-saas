@@ -40,14 +40,49 @@ export default function TimeSeriesPanel({ compact = false }: { compact?: boolean
   const [to, setTo] = React.useState<string>(base.to);
   const [granularity, setGranularity] = React.useState<Granularity>(base.granularity);
   const [metric, setMetric] = React.useState<keyof Point>("sales");
+  const [rangeWarning, setRangeWarning] = React.useState<string | null>(null);
+
+  // Sincronizar estado inicial desde la URL (from, to, granularity, metric, preset)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const usp = new URLSearchParams(window.location.search);
+    const qFrom = usp.get("from");
+    const qTo = usp.get("to");
+    const qGran = usp.get("granularity") as Granularity | null;
+    const qMetric = usp.get("metric") as keyof Point | null;
+    const qPreset = usp.get("preset") as Preset | null;
+    if (qPreset && (["7d","30d","90d","ytd"] as Preset[]).includes(qPreset as Preset)) {
+      setPreset(qPreset as Preset);
+    }
+    if (qFrom) setFrom(qFrom);
+    if (qTo) setTo(qTo);
+    if (qGran && (qGran === "day" || qGran === "week" || qGran === "month")) setGranularity(qGran);
+    if (qMetric && (qMetric === "sales" || qMetric === "orders" || qMetric === "active_clients")) setMetric(qMetric);
+  }, []);
 
   // Mantener sincronizados los controles cuando cambia preset
   React.useEffect(() => {
+    // Si la URL ya especifica from/to, no sobreescribirlos
+    if (typeof window !== "undefined") {
+      const usp = new URLSearchParams(window.location.search);
+      if (usp.has("from") || usp.has("to")) {
+        return;
+      }
+    }
     const r = computeRange(preset);
     setFrom(r.from);
     setTo(r.to);
     setGranularity(r.granularity);
   }, [preset]);
+
+  // Validar rango: from <= to (en formato YYYY-MM-DD se puede comparar lexicográficamente)
+  React.useEffect(() => {
+    if (from && to && from > to) {
+      setRangeWarning("El rango de fechas es inválido (desde > hasta)");
+    } else {
+      setRangeWarning(null);
+    }
+  }, [from, to]);
 
   async function fetchData() {
     try {
@@ -71,6 +106,19 @@ export default function TimeSeriesPanel({ compact = false }: { compact?: boolean
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to, granularity]);
+
+  // Reflejar estado en la URL
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const usp = new URLSearchParams(window.location.search);
+    usp.set("from", from);
+    usp.set("to", to);
+    usp.set("granularity", granularity);
+    usp.set("metric", String(metric));
+    usp.set("preset", preset);
+    const newUrl = `${window.location.pathname}?${usp.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+  }, [from, to, granularity, metric, preset]);
 
   // Render simple line chart
   function LineChart({ data, height = 160 }: { data: number[]; height?: number }) {
@@ -142,7 +190,20 @@ export default function TimeSeriesPanel({ compact = false }: { compact?: boolean
                 <option value="active_clients">Clientes activos (#)</option>
               </select>
             </label>
-            <button type="button" onClick={fetchData} className="btn btn-sm">Actualizar</button>
+            <button type="button" onClick={fetchData} className="btn btn-sm" disabled={!!rangeWarning}>Actualizar</button>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              onClick={() => {
+                const r = computeRange("90d");
+                setPreset("90d");
+                setFrom(r.from);
+                setTo(r.to);
+                setGranularity(r.granularity);
+              }}
+            >
+              Restablecer (90d)
+            </button>
           </div>
         </div>
       )}
@@ -152,6 +213,7 @@ export default function TimeSeriesPanel({ compact = false }: { compact?: boolean
         {metric === "sales" ? `Total: $${fmtMoney(total)}` : `Total: ${total}`}
         {loading ? " · Cargando..." : null}
         {error ? ` · Error: ${error}` : null}
+        {rangeWarning ? ` · ${rangeWarning}` : null}
       </div>
 
       {/* Chart */}

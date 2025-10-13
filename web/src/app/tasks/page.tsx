@@ -7,8 +7,7 @@ import { EventList } from "@/components/event-list";
 import { OKRDashboard } from "@/components/okr-dashboard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, CalendarIcon, List, Moon, Sun, Target } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Plus, CalendarIcon, List, Target } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { CalendarEvent } from "@/types/calendar";
 
@@ -18,7 +17,6 @@ export default function CalendarApp() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showForm, setShowForm] = useState(false);
   const [view, setView] = useState<"calendar" | "list" | "okr">("calendar");
-  const { theme, setTheme } = useTheme();
   const searchParams = useSearchParams();
 
   // Vista inicial desde query param (?view=okr|list|calendar)
@@ -124,58 +122,55 @@ export default function CalendarApp() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Mi Calendario</h1>
-            <p className="text-muted-foreground text-lg">Organiza tus notas, tareas, recordatorios y OKRs</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full bg-transparent"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-
-            <div className="flex bg-muted rounded-lg p-1">
-              <Button
-                variant={view === "calendar" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setView("calendar")}
-                className="rounded-md"
-              >
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Calendario
-              </Button>
-              <Button
-                variant={view === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setView("list")}
-                className="rounded-md"
-              >
-                <List className="h-4 w-4 mr-2" />
-                Lista
-              </Button>
-              <Button
-                variant={view === "okr" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setView("okr")}
-                className="rounded-md"
-              >
-                <Target className="h-4 w-4 mr-2" />
-                OKRs
-              </Button>
+      <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
+        {/* Header mejorado con gradiente */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-indigo-500/10 p-8 mb-8 border border-purple-500/20">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">Mi Calendario</h1>
+              <p className="text-muted-foreground text-base sm:text-lg">Organiza tus notas, tareas, recordatorios y OKRs</p>
             </div>
 
-            <Button onClick={() => setShowForm(true)} className="rounded-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar
-            </Button>
+            <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
+              <div className="flex bg-muted/80 backdrop-blur-sm rounded-xl p-1 shadow-sm">
+                <Button
+                  variant={view === "calendar" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("calendar")}
+                  className="rounded-lg transition-all"
+                >
+                  <CalendarIcon className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Calendario</span>
+                </Button>
+                <Button
+                  variant={view === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("list")}
+                  className="rounded-lg transition-all"
+                >
+                  <List className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Lista</span>
+                </Button>
+                <Button
+                  variant={view === "okr" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("okr")}
+                  className="rounded-lg transition-all"
+                >
+                  <Target className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">OKRs</span>
+                </Button>
+              </div>
+
+              <Button onClick={() => setShowForm(true)} className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Agregar</span>
+                <span className="sm:hidden">+</span>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -183,7 +178,7 @@ export default function CalendarApp() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar/List/OKR View */}
           <div className="lg:col-span-2">
-            <Card className="p-4 sm:p-5">
+            <Card className="p-4 sm:p-6 shadow-lg hover:shadow-xl transition-shadow">
               {view === "calendar" ? (
                 <Calendar selectedDate={selectedDate} onDateSelect={setSelectedDate} events={events} />
               ) : view === "list" ? (
@@ -197,19 +192,31 @@ export default function CalendarApp() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Selected Date Events */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">
-                {selectedDate.toLocaleDateString("es-ES", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </h3>
+            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow border-l-4 border-l-purple-500">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarIcon className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">
+                  {selectedDate.toLocaleDateString("es-ES", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </h3>
+              </div>
 
               <div className="space-y-3">
                 {getEventsForDate(selectedDate).length === 0 ? (
-                  <p className="text-muted-foreground text-sm">No hay eventos para este día</p>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/10 to-blue-500/10 flex items-center justify-center mx-auto mb-3">
+                      <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground text-sm">No hay eventos para este día</p>
+                    <Button onClick={() => setShowForm(true)} variant="ghost" size="sm" className="mt-2">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Agregar evento
+                    </Button>
+                  </div>
                 ) : (
                   getEventsForDate(selectedDate).map((event) => (
                     <div
@@ -268,42 +275,62 @@ export default function CalendarApp() {
             </Card>
 
             {/* Quick Stats */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Resumen</h3>
+            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-background to-muted/20">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Resumen</h3>
+              </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-sm text-muted-foreground">Total eventos</span>
-                  <span className="font-medium">{events.length}</span>
+                  <span className="font-semibold text-lg">{events.length}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-sm text-muted-foreground">Tareas pendientes</span>
-                  <span className="font-medium">{events.filter((e) => e.type === "task" && !e.completed).length}</span>
+                  <span className="font-semibold text-lg text-purple-600">{events.filter((e) => e.type === "task" && !e.completed).length}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-sm text-muted-foreground">Notas</span>
-                  <span className="font-medium">{events.filter((e) => e.type === "note").length}</span>
+                  <span className="font-semibold text-lg text-blue-600">{events.filter((e) => e.type === "note").length}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-sm text-muted-foreground">Recordatorios</span>
-                  <span className="font-medium">{events.filter((e) => e.type === "reminder").length}</span>
+                  <span className="font-semibold text-lg text-green-600">{events.filter((e) => e.type === "reminder").length}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <span className="text-sm text-muted-foreground">OKRs activos</span>
-                  <span className="font-medium">{events.filter((e) => e.type === "okr").length}</span>
+                  <span className="font-semibold text-lg text-orange-600">{events.filter((e) => e.type === "okr").length}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Progreso promedio</span>
-                  <span className="font-medium">
-                    {events.filter((e) => e.type === "okr").length > 0
-                      ? Math.round(
-                          events
-                            .filter((e) => e.type === "okr")
-                            .reduce((acc, e) => acc + (e.progress || 0), 0) /
-                            events.filter((e) => e.type === "okr").length
-                        )
-                      : 0}
-                    %
-                  </span>
+                <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Progreso promedio OKRs</span>
+                    <span className="font-bold text-lg text-orange-600">
+                      {events.filter((e) => e.type === "okr").length > 0
+                        ? Math.round(
+                            events
+                              .filter((e) => e.type === "okr")
+                              .reduce((acc, e) => acc + (e.progress || 0), 0) /
+                              events.filter((e) => e.type === "okr").length
+                          )
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${events.filter((e) => e.type === "okr").length > 0
+                          ? Math.round(
+                              events
+                                .filter((e) => e.type === "okr")
+                                .reduce((acc, e) => acc + (e.progress || 0), 0) /
+                                events.filter((e) => e.type === "okr").length
+                            )
+                          : 0}%`
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </Card>

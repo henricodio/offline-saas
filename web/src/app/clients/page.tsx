@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { ArrowUpDown, ChevronDown, ChevronUp, Plus, Eye, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp, Plus, Eye, Pencil, Trash2, Users } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 
 type Client = {
   id: string;
@@ -189,7 +190,20 @@ export default async function ClientsPage({
       {errMsg ? <p className="text-sm text-orange-600">{errMsg}</p> : null}
 
       {clients.length === 0 ? (
-        <p className="text-sm text-gray-500">No se encontraron clientes.</p>
+        <EmptyState
+          icon={Users}
+          title="No hay clientes"
+          description={q || selectedRoute || selectedCity 
+            ? "No se encontraron clientes con los filtros aplicados. Intenta ajustar tu búsqueda."
+            : "Comienza agregando tu primer cliente para gestionar tus ventas y pedidos de forma eficiente."
+          }
+          action={
+            <Link href="/clients/new" className="btn btn-primary btn-md inline-flex items-center gap-2">
+              <Plus size={16} />
+              Agregar Cliente
+            </Link>
+          }
+        />
       ) : (
         <div className="overflow-auto">
           <table className="table-base table-compact text-center">
@@ -246,14 +260,14 @@ export default async function ClientsPage({
                   <td className="text-center">{c.city || "-"}</td>
                   <td className="text-center">{c.route || "-"}</td>
                   <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1">
-                      <Link href={`/clients/${c.id}`} aria-label="Ver" title="Ver" className="icon-btn">
+                    <div className="inline-flex items-center gap-1 table-actions">
+                      <Link href={`/clients/${c.id}`} aria-label="Ver cliente" title="Ver detalles" className="icon-btn">
                         <Eye size={16} />
                       </Link>
-                      <Link href={`/clients/${c.id}/edit`} aria-label="Editar" title="Editar" className="icon-btn">
+                      <Link href={`/clients/${c.id}/edit`} aria-label="Editar cliente" title="Editar información" className="icon-btn">
                         <Pencil size={16} />
                       </Link>
-                      <button aria-label="Eliminar" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
+                      <button aria-label="Eliminar cliente" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
                         <Trash2 size={16} />
                       </button>
                     </div>

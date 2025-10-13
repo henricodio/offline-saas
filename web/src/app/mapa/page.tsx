@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, MapPin, User, Plus, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Plus, CheckCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -66,9 +66,9 @@ async function fetchRoute(a: { lat: number; lon: number }, b: { lat: number; lon
   const json = await res.json();
   const route = json.routes?.[0];
   if (!route) throw new Error("No route");
-  const coords: [number, number][] = route.geometry.coordinates; // [lon, lat]
-  const distance = route.distance; // meters
-  const duration = route.duration; // seconds
+  const coords: [number, number][] = route.geometry.coordinates;
+  const distance = route.distance;
+  const duration = route.duration;
   return { coords, distance, duration };
 }
 
@@ -141,7 +141,6 @@ export default function VisitsTracker() {
   const todayVisits = visits.filter((visit) => visit.scheduledDate === today);
   const pendingTodayVisits = todayVisits.filter((visit) => visit.status === "pending");
 
-  // --- Estado y refs del mapa ---
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -153,31 +152,29 @@ export default function VisitsTracker() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const stats = {
+    total: visits.length,
+    pending: visits.filter((v) => v.status === "pending").length,
+    completed: visits.filter((v) => v.status === "completed").length,
+    todayPending: pendingTodayVisits.length,
+  };
+
   const getStatusColor = (status: Visit["status"]) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      case "completed":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "cancelled":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      case "pending": return "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400";
+      case "completed": return "bg-green-500/20 text-green-700 dark:text-green-400";
+      case "cancelled": return "bg-red-500/20 text-red-700 dark:text-red-400";
+      default: return "bg-gray-500/20 text-gray-700 dark:text-gray-400";
     }
   };
 
   const getTypeColor = (type: Visit["type"]) => {
     switch (type) {
-      case "maintenance":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "consultation":
-        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
-      case "installation":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "follow-up":
-        return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      case "maintenance": return "bg-blue-500/20 text-blue-700 dark:text-blue-400";
+      case "consultation": return "bg-purple-500/20 text-purple-700 dark:text-purple-400";
+      case "installation": return "bg-green-500/20 text-green-700 dark:text-green-400";
+      case "follow-up": return "bg-orange-500/20 text-orange-700 dark:text-orange-400";
+      default: return "bg-gray-500/20 text-gray-700 dark:text-gray-400";
     }
   };
 
@@ -200,48 +197,29 @@ export default function VisitsTracker() {
   };
 
   const toggleVisitStatus = (id: string) => {
-    setVisits(
-      visits.map((visit) =>
-        visit.id === id ? { ...visit, status: visit.status === "pending" ? "completed" : "pending" } : visit,
-      ),
+    setVisits((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, status: v.status === "pending" ? "completed" : "pending" } as Visit : v))
     );
   };
 
-  const stats = {
-    total: visits.length,
-    pending: visits.filter((v) => v.status === "pending").length,
-    completed: visits.filter((v) => v.status === "completed").length,
-    todayPending: pendingTodayVisits.length,
-  };
-
-  // Inicializa el mapa Leaflet una vez
   useEffect(() => {
-    let cancelled = false;
+    let mounted = true;
     (async () => {
       try {
         const L = await loadLeaflet();
-        if (cancelled) return;
-        if (!mapContainerRef.current) return;
-        const map = L.map(mapContainerRef.current).setView([40.4168, -3.7038], 12);
-        mapRef.current = map;
+        if (!mounted || !mapContainerRef.current || mapRef.current) return;
+        const m = L.map(mapContainerRef.current).setView([40.4168, -3.7038], 6);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
-          maxZoom: 19,
-        }).addTo(map);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error iniciando el mapa");
-      }
+        }).addTo(m);
+        mapRef.current = m;
+      } catch {}
     })();
-    return () => {
-      cancelled = true;
-      try { mapRef.current?.remove(); } catch {}
-      mapRef.current = null;
-    };
+    return () => { mounted = false; };
   }, []);
 
   function clearRouteAndMarkers() {
-    const L = (window as any).L;
-    if (!L || !mapRef.current) return;
+    if (!mapRef.current) return;
     for (const m of markersRef.current) {
       try { mapRef.current.removeLayer(m); } catch {}
     }
@@ -286,20 +264,21 @@ export default function VisitsTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Mapa</h1>
-            <p className="text-muted-foreground mt-1">Seguimiento de visitas y agenda</p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        {/* Header limpio */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold">Visitas y Rutas</h1>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Visita
+            </Button>
           </div>
-          <Button className="bg-primary hover:bg-primary/90" onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Visita
-          </Button>
+          <p className="text-muted-foreground">Gestiona tus visitas a clientes y planifica rutas</p>
         </div>
 
+        {/* Dialog */}
         {showForm && (
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogContent>
@@ -377,173 +356,185 @@ export default function VisitsTracker() {
           </Dialog>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-card border-border p-4">
-            <div className="pb-2 text-sm font-medium text-muted-foreground">Total Visitas</div>
-            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+        {/* Stats compactas */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <div className="text-xs text-muted-foreground">Total</div>
+              </div>
+            </div>
           </Card>
-          <Card className="bg-card border-border p-4">
-            <div className="pb-2 text-sm font-medium text-muted-foreground">Pendientes</div>
-            <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
+                <div className="text-xs text-muted-foreground">Pendientes</div>
+              </div>
+            </div>
           </Card>
-          <Card className="bg-card border-border p-4">
-            <div className="pb-2 text-sm font-medium text-muted-foreground">Completadas</div>
-            <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-emerald-600">{stats.completed}</div>
+                <div className="text-xs text-muted-foreground">Completadas</div>
+              </div>
+            </div>
           </Card>
-          <Card className="bg-card border-border p-4">
-            <div className="pb-2 text-sm font-medium text-muted-foreground">Hoy Pendientes</div>
-            <div className="text-2xl font-bold text-primary">{stats.todayPending}</div>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-600">{stats.todayPending}</div>
+                <div className="text-xs text-muted-foreground">Hoy</div>
+              </div>
+            </div>
           </Card>
         </div>
 
-        {/* Today's Visits Highlight */}
-        <Card className="bg-card border-border p-4">
-          <div className="flex items-center gap-2 text-foreground text-lg font-semibold mb-2">
-            <CalendarIcon className="w-5 h-5 text-primary" />
-            Visitas de Hoy - {new Date().toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </div>
-          {pendingTodayVisits.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
-              <p>¡Excelente! No tienes visitas pendientes para hoy.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {pendingTodayVisits.map((visit) => (
-                <div
-                  key={visit.id}
-                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg border border-border"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-mono text-sm">{visit.scheduledTime}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{visit.clientName}</h3>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {visit.clientAddress}
-                      </p>
-                      {visit.notes && <p className="text-sm text-muted-foreground mt-1">{visit.notes}</p>}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getTypeColor(visit.type)}>
-                      {visit.type === "maintenance" && "Mantenimiento"}
-                      {visit.type === "consultation" && "Consulta"}
-                      {visit.type === "installation" && "Instalación"}
-                      {visit.type === "follow-up" && "Seguimiento"}
-                    </Badge>
-                    <Button
-                      size="sm"
-                      onClick={() => toggleVisitStatus(visit.id)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Completar
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* All Visits */}
-        <Card className="bg-card border-border p-4">
-          <div className="text-foreground text-lg font-semibold mb-2">Todas las Visitas</div>
-          <div className="space-y-4">
-            {visits.map((visit) => (
-              <div
-                key={visit.id}
-                className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-center gap-1">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(visit.scheduledDate).toLocaleDateString("es-ES", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <span className="text-xs font-mono text-muted-foreground">{visit.scheduledTime}</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      {visit.clientName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {visit.clientAddress}
-                    </p>
-                    {visit.notes && <p className="text-sm text-muted-foreground mt-1">{visit.notes}</p>}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className={getTypeColor(visit.type)}>
-                    {visit.type === "maintenance" && "Mantenimiento"}
-                    {visit.type === "consultation" && "Consulta"}
-                    {visit.type === "installation" && "Instalación"}
-                    {visit.type === "follow-up" && "Seguimiento"}
-                  </Badge>
-                  <Badge className={getStatusColor(visit.status)}>
-                    {visit.status === "pending" && "Pendiente"}
-                    {visit.status === "completed" && "Completada"}
-                    {visit.status === "cancelled" && "Cancelada"}
-                  </Badge>
-                  {visit.status === "pending" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleVisitStatus(visit.id)}
-                      className="border-green-500/30 text-green-400 hover:bg-green-500/20"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Marcar Completada
-                    </Button>
-                  )}
-                </div>
+        {/* Layout 2 columnas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Columna izquierda: Visitas */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Visitas de Hoy */}
+            <Card className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Visitas de Hoy</h3>
+                <span className="text-sm text-muted-foreground">
+                  {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+                </span>
               </div>
-            ))}
-          </div>
-        </Card>
+              {pendingTodayVisits.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-emerald-500 opacity-50" />
+                  <p className="text-sm text-muted-foreground">No hay visitas pendientes para hoy</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {pendingTodayVisits.map((visit) => (
+                    <div key={visit.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      <span className="font-mono text-sm font-medium min-w-[50px]">{visit.scheduledTime}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{visit.clientName}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{visit.clientAddress}</p>
+                      </div>
+                      <Button size="sm" onClick={() => toggleVisitStatus(visit.id)} variant="outline">
+                        <CheckCircle className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
 
-        {/* Planificador de rutas */}
-        <Card className="bg-card border-border p-4 space-y-4">
-          <div className="text-foreground text-lg font-semibold">Planificador de rutas</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="origin">Origen</Label>
-              <Input id="origin" placeholder="Ej: Gran Vía, Madrid" value={origin} onChange={(e) => setOrigin(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="destination">Destino</Label>
-              <Input id="destination" placeholder="Ej: Plaza Mayor, Madrid" value={destination} onChange={(e) => setDestination(e.target.value)} />
-            </div>
+            {/* Todas las Visitas */}
+            <Card className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Todas las Visitas</h3>
+                <Badge variant="outline">{visits.length} visitas</Badge>
+              </div>
+              <div className="space-y-2">
+                {visits.map((visit) => (
+                  <div
+                    key={visit.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                      visit.status === "completed" ? "opacity-60" : "hover:bg-muted/50"
+                    }`}
+                  >
+                    <div className="text-center min-w-[60px]">
+                      <div className="text-xs font-semibold">
+                        {new Date(visit.scheduledDate).toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
+                      </div>
+                      <div className="text-xs font-mono text-muted-foreground">{visit.scheduledTime}</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">{visit.clientName}</h4>
+                      <p className="text-xs text-muted-foreground truncate">{visit.clientAddress}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-xs ${getStatusColor(visit.status)}`}>
+                        {visit.status === "pending" ? "Pendiente" : visit.status === "completed" ? "Completada" : "Cancelada"}
+                      </Badge>
+                      {visit.status === "pending" && (
+                        <Button size="sm" onClick={() => toggleVisitStatus(visit.id)} variant="ghost">
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
-          <div className="flex items-center gap-3">
-            <Button onClick={planRoute} disabled={loading}>
-              {loading ? "Calculando..." : "Planificar ruta"}
-            </Button>
-            <Button variant="ghost" onClick={() => { clearRouteAndMarkers(); setSummary(null); setError(null); }}>
-              Limpiar
-            </Button>
-          </div>
-          {error && <div className="text-sm text-red-600">{error}</div>}
-          {summary && (
-            <div className="text-sm text-[var(--muted-foreground)]">
-              Distancia: <span className="font-medium">{summary.distanceKm} km</span> · Tiempo estimado: <span className="font-medium">{summary.durationMin} min</span>
-            </div>
-          )}
-        </Card>
 
-        <Card className="bg-card border-border p-2">
-          <div ref={mapContainerRef} style={{ height: 500, width: "100%", borderRadius: 8 }} />
-        </Card>
+          {/* Columna derecha: Mapa y Rutas */}
+          <div className="space-y-6">
+            {/* Planificador de rutas */}
+            <Card className="p-5">
+              <h3 className="text-lg font-semibold mb-4">Planificar Ruta</h3>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="origin" className="text-sm">Origen</Label>
+                  <Input
+                    id="origin"
+                    placeholder="Ej: Gran Vía, Madrid"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="destination" className="text-sm">Destino</Label>
+                  <Input
+                    id="destination"
+                    placeholder="Ej: Plaza Mayor, Madrid"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={planRoute} disabled={loading || !origin || !destination} className="flex-1">
+                    {loading ? "Calculando..." : "Planificar"}
+                  </Button>
+                  <Button variant="outline" onClick={() => { clearRouteAndMarkers(); setSummary(null); setError(null); }}>
+                    Limpiar
+                  </Button>
+                </div>
+                {error && <div className="text-sm text-red-600 p-2 rounded bg-red-50 dark:bg-red-950/20">{error}</div>}
+                {summary && (
+                  <div className="text-sm p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Distancia:</span>
+                      <span className="font-semibold">{summary.distanceKm} km</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Tiempo:</span>
+                      <span className="font-semibold">{summary.durationMin} min</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Mapa */}
+            <Card className="p-2">
+              <div ref={mapContainerRef} style={{ height: 400, width: "100%", borderRadius: 8 }} className="bg-muted/20" />
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
