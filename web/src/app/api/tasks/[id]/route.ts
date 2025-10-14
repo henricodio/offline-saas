@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     if (!id) return NextResponse.json({ error: "Falta id" }, { status: 400 });
     const body = await req.json().catch(() => ({}));
     const updates: Record<string, unknown> = {};
@@ -26,9 +26,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     if (!id) return NextResponse.json({ error: "Falta id" }, { status: 400 });
     const { error } = await supabaseServer.from("tasks").delete().eq("id", id);
     if (error) throw error;
