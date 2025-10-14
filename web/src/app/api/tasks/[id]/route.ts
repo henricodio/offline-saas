@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+// Next.js 15 compatible
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
