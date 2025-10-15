@@ -26,33 +26,28 @@ type OrderRow = {
 };
 
 type OrderItemRow = { total_linea: number | null };
-type ClientRow = { id: string; nombre: string | null };
 
 function sb() {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) return null;
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, { auth: { persistSession: false } });
 }
 
-async function tg(method: string, payload: unknown) {
+async function sendMessage(chatId: number, text: string) {
   if (!API) return;
-  await fetch(`${API}/${method}`, {
+  await fetch(`${API}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ chat_id: chatId, text }),
   });
 }
 
-type InlineButton = { text: string; callback_data: string };
-type InlineKeyboard = InlineButton[][];
-
-async function sendMessage(chatId: number, text: string, inline_keyboard?: InlineKeyboard) {
-  const payload: { chat_id: number; text: string; reply_markup?: { inline_keyboard: InlineKeyboard } } = { chat_id: chatId, text };
-  if (inline_keyboard) payload.reply_markup = { inline_keyboard };
-  await tg('sendMessage', payload);
-}
-
 async function answerCallbackQuery(id: string, text?: string) {
-  await tg('answerCallbackQuery', { callback_query_id: id, text });
+  if (!API) return;
+  await fetch(`${API}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ callback_query_id: id, text }),
+  });
 }
 
 function parts(s: string) {
@@ -72,7 +67,6 @@ function helpText() {
     'Comandos:',
     '/start - saludo',
     '/help - esta ayuda',
-    '/menu - menú principal',
     '/cliente Nombre | email | telefono - crea cliente',
     '/pedido ClienteUUID o Nombre | total | estado(opc) - crea pedido',
     '/item orderId | Producto | precio | cantidad - agrega ítem',
@@ -122,9 +116,9 @@ async function handlePedido(argText: string, chatId: number) {
 async function recalcTotal(supabase: ReturnType<typeof sb>, orderId: string) {
   const { data } = await supabase!.from('order_items').select('total_linea').eq('order_id', orderId);
   const sum = (data as OrderItemRow[] | null ?? []).reduce(
-    (acc: number, r: OrderItemRow) => acc + Number(r.total_linea ?? 0),
-    0
-  );
+  (acc: number, r: OrderItemRow) => acc + Number(r.total_linea ?? 0),
+  0
+);
   await supabase!.from('orders').update({ total: sum }).eq('id', orderId);
 }
 
@@ -149,7 +143,7 @@ async function handleEstado(argText: string, chatId: number) {
   if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
   const idText = argText.trim();
   if (!idText) return sendMessage(chatId, 'Uso: /estado orderId o #codigo');
-  let row: OrderRow | null = null;
+ let row: OrderRow | null = null;
   const code = idText.startsWith('#') ? idText.slice(1) : null;
   if (code) {
     const { data } = await supabase
@@ -157,14 +151,14 @@ async function handleEstado(argText: string, chatId: number) {
       .select('id, total, fecha, created_at, short_code, estado')
       .eq('short_code', code)
       .maybeSingle();
-    row = data as OrderRow | null;
+    row = data;
   } else {
     const { data } = await supabase
       .from('orders')
       .select('id, total, fecha, created_at, estado')
       .eq('id', idText)
       .maybeSingle();
-    row = data as OrderRow | null;
+    row = data;
   }
   if (!row) return sendMessage(chatId, 'Pedido no encontrado.');
   const fecha = row.fecha ?? (row.created_at ? String(row.created_at).slice(0, 10) : '-');
@@ -172,82 +166,6 @@ async function handleEstado(argText: string, chatId: number) {
   const estado = row.estado ?? '-';
   const codeShown = row.short_code ? `#${row.short_code}` : row.id;
   return sendMessage(chatId, `Pedido ${codeShown}\nFecha: ${fecha}\nEstado: ${estado}\nTotal: ${total}`);
-}
-
-function mainMenuKeyboard(): InlineKeyboard {
-  return [
-    [{ text: '👥 Clientes', callback_data: 'menu:clients:0' }],
-    [{ text: '🧾 Pedidos', callback_data: 'menu:orders' }],
-    [{ text: 'ℹ️ Ayuda', callback_data: 'menu:help' }],
-  ];
-}
-
-async function showMainMenu(chatId: number) {
-  await sendMessage(chatId, 'Menú principal', mainMenuKeyboard());
-}
-
-const CLIENTS_PAGE_SIZE = 10;
-
-function buildClientsKeyboard(clients: { id: string; nombre: string | null }[], page: number, total: number): InlineKeyboard {
-  const rows: InlineKeyboard = [];
-  for (const c of clients) {
-    rows.push([{ text: c.nombre || 'N/D', callback_data: `client:show:${c.id}` }]);
-  }
-  const totalPages = Math.max(1, Math.ceil(total / CLIENTS_PAGE_SIZE));
-  const hasPrev = page > 0;
-  const hasNext = page + 1 < totalPages;
-  const nav: InlineButton[] = [];
-  if (hasPrev) nav.push({ text: '◀️ Anterior', callback_data: `menu:clients:${page - 1}` });
-  if (hasNext) nav.push({ text: 'Siguiente ▶️', callback_data: `menu:clients:${page + 1}` });
-  if (nav.length) rows.push(nav);
-  rows.push([{ text: '⬅️ Menú', callback_data: 'menu:home' }]);
-  return rows;
-}
-
-async function showClientsPage(chatId: number, page = 0) {
-  const supabase = sb();
-  if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
-  const from = page * CLIENTS_PAGE_SIZE;
-  const to = from + CLIENTS_PAGE_SIZE - 1;
-  const { data, count, error } = await supabase
-    .from('clients')
-    .select('id,nombre', { count: 'exact' })
-    .order('nombre', { ascending: true })
-    .range(from, to);
-  if (error) return sendMessage(chatId, `Error listando clientes: ${error.message}`);
-  const total = count || 0;
-  const rows = (data as ClientRow[] | null) ?? [];
-  const kb = buildClientsKeyboard(rows.map(r => ({ id: r.id, nombre: r.nombre })), page, total);
-  await sendMessage(chatId, `Clientes — Página ${page + 1} de ${Math.max(1, Math.ceil(total / CLIENTS_PAGE_SIZE))}`, kb);
-}
-
-async function showClient(chatId: number, clientId: string) {
-  const supabase = sb();
-  if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id,nombre,contacto,direccion,category,route')
-    .eq('id', clientId)
-    .maybeSingle();
-  if (error || !data) return sendMessage(chatId, 'Cliente no encontrado.');
-  const d = data as { id: string; nombre: string | null; contacto: string | null; direccion: string | null; category: string | null; route: string | null };
-  const texto =
-    `Cliente\n` +
-    `• Nombre: ${d.nombre ?? 'N/D'}\n` +
-    `• Contacto: ${d.contacto ?? 'N/D'}\n` +
-    `• Dirección: ${d.direccion ?? 'N/D'}\n` +
-    `• Categoría: ${d.category ?? 'N/D'}\n` +
-    `• Ciudad: ${d.route ?? 'N/D'}`;
-  const kb: InlineKeyboard = [
-    [{ text: '⬅️ Volver a clientes', callback_data: 'menu:clients:0' }],
-    [{ text: '⬅️ Menú', callback_data: 'menu:home' }],
-  ];
-  await sendMessage(chatId, texto, kb);
-}
-
-function parseCb(data: string) {
-  const [ns, action, arg] = (data || '').split(':');
-  return { ns, action, arg };
 }
 
 export async function POST(req: Request) {
@@ -260,42 +178,13 @@ export async function POST(req: Request) {
     let update: TgUpdate = {} as TgUpdate;
     try { update = await req.json(); } catch {}
 
-    const msg = update.message;
-    const cbq = update.callback_query;
+    const msg = update?.message;
+    const cbq = update?.callback_query;
     const chatId: number | undefined = msg?.chat?.id ?? cbq?.message?.chat?.id;
 
     if (cbq?.id) {
       await answerCallbackQuery(cbq.id);
-      const data = cbq.data || '';
-      const { ns, action, arg } = parseCb(data);
-      if (!chatId) return new Response('ok');
-
-      if (ns === 'menu') {
-        if (action === 'home') {
-          await showMainMenu(chatId);
-          return new Response('ok');
-        }
-        if (action === 'clients') {
-          const page = Math.max(0, Number(arg || '0') || 0);
-          await showClientsPage(chatId, page);
-          return new Response('ok');
-        }
-        if (action === 'orders') {
-          await sendMessage(chatId, 'Menú de pedidos en construcción.');
-          return new Response('ok');
-        }
-        if (action === 'help') {
-          await sendMessage(chatId, helpText());
-          return new Response('ok');
-        }
-      }
-
-      if (ns === 'client' && action === 'show' && arg) {
-        await showClient(chatId, arg);
-        return new Response('ok');
-      }
-
-      await sendMessage(chatId, 'Acción no reconocida. Usa /menu.');
+      if (chatId) await sendMessage(chatId, 'Acción de menú en construcción. Usa /help.');
       return new Response('ok');
     }
 
@@ -303,12 +192,7 @@ export async function POST(req: Request) {
     if (!chatId) return new Response('ok');
 
     if (text.startsWith('/start')) {
-      await sendMessage(chatId, '¡Hola! Bot conectado en Vercel + Supabase. Usa /menu o /help.');
-      await showMainMenu(chatId);
-      return new Response('ok');
-    }
-    if (text.startsWith('/menu')) {
-      await showMainMenu(chatId);
+      await sendMessage(chatId, '¡Hola! Bot conectado en Vercel + Supabase. Usa /help para ver comandos.');
       return new Response('ok');
     }
     if (text.startsWith('/help')) {
@@ -332,10 +216,10 @@ export async function POST(req: Request) {
       return new Response('ok');
     }
 
-    await sendMessage(chatId, 'Comando no reconocido. Usa /menu o /help.');
+    await sendMessage(chatId, 'Comando no reconocido. Usa /help.');
     return new Response('ok');
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'unknown';
-    return new Response(`error: ${message}`, { status: 200 });
-  }
+  const message = e instanceof Error ? e.message : 'unknown';
+  return new Response(`error: ${message}`, { status: 200 });
+}
 }
