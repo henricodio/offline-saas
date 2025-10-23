@@ -16,19 +16,16 @@ type TgMessage = { chat?: TgChat; text?: string };
 type TgCallbackQuery = { id: string; data?: string; message?: { chat?: TgChat } };
 type TgUpdate = { message?: TgMessage; callback_query?: TgCallbackQuery };
 
-type OrderRow = {
-  id: string;
-  total: number | null;
-  fecha?: string | null;
-  created_at?: string;
-  short_code?: string;
-  estado?: string | null;
-};
-
-type OrderItemRow = { total_linea: number | null };
 
 function sb() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) return null;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+    console.error('[Telegram Bot] Supabase vars missing:', { 
+      hasUrl: !!SUPABASE_URL, 
+      hasKey: !!SUPABASE_SERVICE_ROLE 
+    });
+    return null;
+  }
+  console.log('[Telegram Bot] Supabase connected:', SUPABASE_URL.substring(0, 30) + '...');
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, { auth: { persistSession: false } });
 }
 
@@ -67,10 +64,9 @@ function helpText() {
     'Comandos:',
     '/start - saludo',
     '/help - esta ayuda',
-    '/cliente Nombre | email | telefono - crea cliente',
+    '/cliente Nombre | contacto | direccion - crea cliente',
     '/pedido ClienteUUID o Nombre | total | estado(opc) - crea pedido',
-    '/item orderId | Producto | precio | cantidad - agrega ítem',
-    '/estado orderId o #codigo - estado de un pedido',
+    '/estado orderId - estado de un pedido',
   ].join('\n');
 }
 
@@ -84,11 +80,11 @@ async function resolveClienteId(supabase: ReturnType<typeof sb>, input: string) 
 async function handleCliente(argText: string, chatId: number) {
   const supabase = sb();
   if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
-  const [nombre, contacto, telefono] = parts(argText);
-  if (!nombre) return sendMessage(chatId, 'Uso: /cliente Nombre | email | telefono');
+  const [nombre, contacto, direccion] = parts(argText);
+  if (!nombre) return sendMessage(chatId, 'Uso: /cliente Nombre | contacto | direccion');
   const { data, error } = await supabase
     .from('clients')
-    .insert({ nombre, contacto: contacto ?? null, telefono: telefono ?? null })
+    .insert({ nombre, contacto: contacto ?? null, direccion: direccion ?? null })
     .select('id,nombre')
     .single();
   if (error) return sendMessage(chatId, `Error creando cliente: ${error.message}`);
@@ -113,59 +109,21 @@ async function handlePedido(argText: string, chatId: number) {
   return sendMessage(chatId, `Pedido creado con ID: ${data?.id}\nEstado: ${estadoVal}\nTotal: ${total ?? 0}`);
 }
 
-async function recalcTotal(supabase: ReturnType<typeof sb>, orderId: string) {
-  const { data } = await supabase!.from('order_items').select('total_linea').eq('order_id', orderId);
-  const sum = (data as OrderItemRow[] | null ?? []).reduce(
-  (acc: number, r: OrderItemRow) => acc + Number(r.total_linea ?? 0),
-  0
-);
-  await supabase!.from('orders').update({ total: sum }).eq('id', orderId);
-}
-
-async function handleItem(argText: string, chatId: number) {
-  const supabase = sb();
-  if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
-  const [orderId, nombre, precioStr, cantStr] = parts(argText);
-  if (!orderId || !nombre) return sendMessage(chatId, 'Uso: /item orderId | Producto | precio | cantidad');
-  const precio = precioStr ? Number(precioStr) : 0;
-  const cantidad = cantStr ? Number(cantStr) : 1;
-  const total_linea = Number((precio * cantidad).toFixed(2));
-  const { error } = await supabase
-    .from('order_items')
-    .insert({ order_id: orderId, nombre_producto: nombre, precio_unitario: precio, cantidad, total_linea });
-  if (error) return sendMessage(chatId, `Error agregando ítem: ${error.message}`);
-  await recalcTotal(supabase, orderId);
-  return sendMessage(chatId, `Ítem agregado a pedido ${orderId}: ${nombre} x${cantidad} @ ${precio.toFixed(2)} = ${total_linea.toFixed(2)}`);
-}
-
 async function handleEstado(argText: string, chatId: number) {
   const supabase = sb();
   if (!supabase) return sendMessage(chatId, 'Config de servidor faltante.');
   const idText = argText.trim();
-  if (!idText) return sendMessage(chatId, 'Uso: /estado orderId o #codigo');
- let row: OrderRow | null = null;
-  const code = idText.startsWith('#') ? idText.slice(1) : null;
-  if (code) {
-    const { data } = await supabase
-      .from('orders_with_short_code')
-      .select('id, total, fecha, created_at, short_code, estado')
-      .eq('short_code', code)
-      .maybeSingle();
-    row = data;
-  } else {
-    const { data } = await supabase
-      .from('orders')
-      .select('id, total, fecha, created_at, estado')
-      .eq('id', idText)
-      .maybeSingle();
-    row = data;
-  }
-  if (!row) return sendMessage(chatId, 'Pedido no encontrado.');
-  const fecha = row.fecha ?? (row.created_at ? String(row.created_at).slice(0, 10) : '-');
-  const total = Number(row.total ?? 0).toFixed(2);
-  const estado = row.estado ?? '-';
-  const codeShown = row.short_code ? `#${row.short_code}` : row.id;
-  return sendMessage(chatId, `Pedido ${codeShown}\nFecha: ${fecha}\nEstado: ${estado}\nTotal: ${total}`);
+  if (!idText) return sendMessage(chatId, 'Uso: /estado orderId');
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, total, fecha, created_at, estado')
+    .eq('id', idText)
+    .maybeSingle();
+  if (error || !data) return sendMessage(chatId, 'Pedido no encontrado.');
+  const fecha = data.fecha ?? (data.created_at ? String(data.created_at).slice(0, 10) : '-');
+  const total = Number(data.total ?? 0).toFixed(2);
+  const estado = data.estado ?? '-';
+  return sendMessage(chatId, `Pedido ${data.id}\nFecha: ${fecha}\nEstado: ${estado}\nTotal: ${total}`);
 }
 
 export async function POST(req: Request) {
@@ -205,10 +163,6 @@ export async function POST(req: Request) {
     }
     if (text.startsWith('/pedido')) {
       await handlePedido(text.replace('/pedido', '').trim(), chatId);
-      return new Response('ok');
-    }
-    if (text.startsWith('/item')) {
-      await handleItem(text.replace('/item', '').trim(), chatId);
       return new Response('ok');
     }
     if (text.startsWith('/estado')) {
