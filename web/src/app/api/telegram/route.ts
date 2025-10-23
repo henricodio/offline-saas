@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@supabase/supabase-js';
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || '';
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || '';
+const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || '';
 
 const API = TOKEN ? `https://api.telegram.org/bot${TOKEN}` : '';
 
@@ -124,6 +124,42 @@ async function handleEstado(argText: string, chatId: number) {
   const total = Number(data.total ?? 0).toFixed(2);
   const estado = data.estado ?? '-';
   return sendMessage(chatId, `Pedido ${data.id}\nFecha: ${fecha}\nEstado: ${estado}\nTotal: ${total}`);
+}
+
+// Endpoint de salud: GET /api/telegram?secret=...&health=1
+export async function GET(req: Request) {
+  try {
+    const url = new URL(req.url);
+    if (SECRET && url.searchParams.get('secret') !== SECRET) {
+      return new Response('unauthorized', { status: 401 });
+    }
+
+    const health = url.searchParams.get('health');
+    if (!health) return new Response('ok');
+
+    const hasToken = !!TOKEN;
+    const hasUrl = !!SUPABASE_URL;
+    const hasKey = !!SUPABASE_SERVICE_ROLE;
+
+    const client = sb();
+    if (!client) {
+      return Response.json({ ok: false, hasToken, hasUrl, hasKey, canConnect: false });
+    }
+
+    const { data, error } = await client.from('clients').select('id').limit(1);
+    return Response.json({
+      ok: !error,
+      hasToken,
+      hasUrl,
+      hasKey,
+      canConnect: !error,
+      sample: (data || []).length,
+      error: error?.message,
+    });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return Response.json({ ok: false, error: msg });
+  }
 }
 
 export async function POST(req: Request) {
