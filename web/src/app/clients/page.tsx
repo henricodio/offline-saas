@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { ArrowUpDown, ChevronDown, ChevronUp, Plus, Eye, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
+import ClientCard from "@/components/ClientCard";
 
 type Client = {
   id: string;
@@ -108,18 +109,6 @@ export default async function ClientsPage({
   const hasNext = page * PAGE_SIZE < total;
   
 
-  function sortHref(col: string) {
-    const isActive = sortCol === col;
-    const nextOrder = isActive && orderParam !== "asc" ? "asc" : "desc";
-    return buildQS({
-      q: q || undefined,
-      route: selectedRoute || undefined,
-      city: selectedCity || undefined,
-      sort: col,
-      order: nextOrder,
-      page: "1",
-    });
-  }
 
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-5">
@@ -205,77 +194,20 @@ export default async function ClientsPage({
           }
         />
       ) : (
-        <div className="overflow-auto">
-          <table className="table-base table-compact text-center">
-            <thead>
-              <tr>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("nombre")} className="inline-flex items-center gap-1">
-                    Nombre {sortCol === "nombre" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("phone")} className="inline-flex items-center gap-1">
-                    Teléfono {sortCol === "phone" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("contacto")} className="inline-flex items-center gap-1">
-                    Contacto {sortCol === "contacto" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("direccion")} className="inline-flex items-center gap-1">
-                    Dirección {sortCol === "direccion" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("city")} className="inline-flex items-center gap-1">
-                    Ciudad {sortCol === "city" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("route")} className="inline-flex items-center gap-1">
-                    Ruta {sortCol === "route" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center whitespace-nowrap" style={{ textAlign: "center" }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((c) => (
-                <tr key={c.id}>
-                  <td className="text-center">
-                    <Link href={`/clients/${c.id}`} className="font-medium hover:underline">
-                      {c.nombre}
-                    </Link>
-                  </td>
-                  <td className="text-center">{c.phone || "-"}</td>
-                  <td className="text-center">{c.contacto || "-"}</td>
-                  <td className="text-center">
-                    <div className="max-w-[280px] truncate mx-auto text-center" title={c.direccion || "-"}>
-                      {c.direccion || "-"}
-                    </div>
-                  </td>
-                  <td className="text-center">{c.city || "-"}</td>
-                  <td className="text-center">{c.route || "-"}</td>
-                  <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1 table-actions">
-                      <Link href={`/clients/${c.id}`} aria-label="Ver cliente" title="Ver detalles" className="icon-btn">
-                        <Eye size={16} />
-                      </Link>
-                      <Link href={`/clients/${c.id}/edit`} aria-label="Editar cliente" title="Editar información" className="icon-btn">
-                        <Pencil size={16} />
-                      </Link>
-                      <button aria-label="Eliminar cliente" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {clients.map((c) => (
+            <ClientCard
+              key={c.id}
+              id={c.id}
+              nombre={c.nombre}
+              contacto={c.contacto}
+              phone={c.phone}
+              direccion={c.direccion}
+              city={c.city}
+              route={c.route}
+              created_at={c.created_at}
+            />
+          ))}
         </div>
       )}
 
