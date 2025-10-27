@@ -35,10 +35,11 @@ export default async function ClientDetail({ params }: { params: { id: string } 
   if (!clientRow) return notFound();
   const client: Client = clientRow as Client;
 
-  const [{ count: ordersCount = 0 }, ordersTotalRes] = await Promise.all([
+  const [countRes, ordersTotalRes] = await Promise.all([
     sb.from("orders").select("id", { count: "exact", head: true }).eq("cliente_id", params.id),
     sb.from("orders").select("total").eq("cliente_id", params.id).limit(10000),
   ]);
+  const ordersCount = countRes.count ?? 0;
   const totalSpent = (ordersTotalRes.data ?? []).reduce((acc: number, r: { total: number | null }) => acc + Number(r.total ?? 0), 0);
   const avgOrder = ordersCount > 0 ? totalSpent / ordersCount : 0;
 
