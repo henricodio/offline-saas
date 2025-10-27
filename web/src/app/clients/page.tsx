@@ -2,7 +2,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Plus, Users } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
-import ClientCard from "@/components/ClientCard";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type Client = {
   id: string;
@@ -194,20 +194,49 @@ export default async function ClientsPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {clients.map((c) => (
-            <ClientCard
-              key={c.id}
-              id={c.id}
-              nombre={c.nombre}
-              contacto={c.contacto}
-              phone={c.phone}
-              direccion={c.direccion}
-              city={c.city}
-              route={c.route}
-              created_at={c.created_at}
-            />
-          ))}
+        <div className="overflow-x-auto card">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold">Nombre</th>
+                <th className="px-4 py-3 text-left font-semibold">Contacto</th>
+                <th className="px-4 py-3 text-left font-semibold">Teléfono</th>
+                <th className="px-4 py-3 text-left font-semibold">Dirección</th>
+                <th className="px-4 py-3 text-left font-semibold">Ciudad</th>
+                <th className="px-4 py-3 text-left font-semibold">Ruta</th>
+                <th className="px-4 py-3 text-center font-semibold">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {clients.map((c) => (
+                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <Link href={`/clients/${c.id}`} className="text-blue-600 hover:underline font-medium">
+                      {c.nombre}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{c.contacto || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.phone || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600 truncate max-w-xs" title={c.direccion || ''}>{c.direccion || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.city || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.route || '-'}</td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="inline-flex items-center gap-1">
+                      <Link href={`/clients/${c.id}`} className="p-2 hover:bg-blue-100 rounded transition-colors" title="Ver">
+                        <Eye size={16} className="text-blue-600" />
+                      </Link>
+                      <Link href={`/clients/${c.id}/edit`} className="p-2 hover:bg-yellow-100 rounded transition-colors" title="Editar">
+                        <Pencil size={16} className="text-yellow-600" />
+                      </Link>
+                      <button className="p-2 hover:bg-red-100 rounded transition-colors opacity-50 cursor-not-allowed" disabled title="Eliminar">
+                        <Trash2 size={16} className="text-red-600" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Plus, Package } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
-import ProductCard from "@/components/ProductCard";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type Product = {
   id: string;
@@ -187,18 +187,56 @@ export default async function ProductsPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map((p) => (
-            <ProductCard
-              key={p.id}
-              id={p.id}
-              name={p.name}
-              price={p.price}
-              stock={p.stock}
-              category={p.category}
-              external_id={p.external_id}
-            />
-          ))}
+        <div className="overflow-x-auto card">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold">Nombre</th>
+                <th className="px-4 py-3 text-left font-semibold">SKU</th>
+                <th className="px-4 py-3 text-right font-semibold">Precio</th>
+                <th className="px-4 py-3 text-center font-semibold">Stock</th>
+                <th className="px-4 py-3 text-left font-semibold">Categoría</th>
+                <th className="px-4 py-3 text-center font-semibold">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {products.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <Link href={`/products/${p.id}`} className="text-blue-600 hover:underline font-medium">
+                      {p.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 font-mono text-xs">{p.external_id ?? '-'}</td>
+                  <td className="px-4 py-3 text-right text-gray-600 font-medium">${p.price != null ? Number(p.price).toFixed(2) : '-'}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      p.stock == null ? 'bg-gray-100 text-gray-800' :
+                      p.stock <= 0 ? 'bg-red-100 text-red-800' :
+                      p.stock <= 20 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {p.stock ?? 'N/D'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{p.category ?? '-'}</td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="inline-flex items-center gap-1">
+                      <Link href={`/products/${p.id}`} className="p-2 hover:bg-blue-100 rounded transition-colors" title="Ver">
+                        <Eye size={16} className="text-blue-600" />
+                      </Link>
+                      <Link href={`/products/${p.id}/edit`} className="p-2 hover:bg-yellow-100 rounded transition-colors" title="Editar">
+                        <Pencil size={16} className="text-yellow-600" />
+                      </Link>
+                      <button className="p-2 hover:bg-red-100 rounded transition-colors opacity-50 cursor-not-allowed" disabled title="Eliminar">
+                        <Trash2 size={16} className="text-red-600" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

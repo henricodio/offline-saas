@@ -2,7 +2,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
 import { ShoppingCart, Plus } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
-import OrderCard from "@/components/OrderCard";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type OrderRow = {
   id: number;
@@ -274,17 +274,55 @@ export default async function OrdersPage({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rows.map((o: OrderRow) => (
-            <OrderCard
-              key={o.id}
-              id={String(o.id)}
-              total={o.total}
-              fecha={o.fecha}
-              created_at={o.created_at}
-              estado={o.estado}
-            />
-          ))}
+        <div className="overflow-x-auto card">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold">ID</th>
+                <th className="px-4 py-3 text-left font-semibold">Fecha</th>
+                <th className="px-4 py-3 text-right font-semibold">Total</th>
+                <th className="px-4 py-3 text-left font-semibold">Estado</th>
+                <th className="px-4 py-3 text-center font-semibold">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rows.map((o: OrderRow) => (
+                <tr key={o.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <Link href={`/orders/${o.id}`} className="text-blue-600 hover:underline font-medium font-mono text-xs">
+                      #{o.short_code ?? `${o.fecha ?? o.created_at?.slice(0, 10)} - ${o.id}`}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{o.fecha ?? o.created_at?.slice(0, 10) ?? '-'}</td>
+                  <td className="px-4 py-3 text-right text-gray-600 font-medium">${Number(o.total ?? 0).toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      o.estado === 'completado' ? 'bg-green-100 text-green-800' :
+                      o.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                      o.estado === 'en_proceso' ? 'bg-blue-100 text-blue-800' :
+                      o.estado === 'cancelado' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {(o.estado || 'pendiente').charAt(0).toUpperCase() + (o.estado || 'pendiente').slice(1).replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="inline-flex items-center gap-1">
+                      <Link href={`/orders/${o.id}`} className="p-2 hover:bg-blue-100 rounded transition-colors" title="Ver">
+                        <Eye size={16} className="text-blue-600" />
+                      </Link>
+                      <Link href={`/orders/${o.id}/edit`} className="p-2 hover:bg-yellow-100 rounded transition-colors" title="Editar">
+                        <Pencil size={16} className="text-yellow-600" />
+                      </Link>
+                      <button className="p-2 hover:bg-red-100 rounded transition-colors opacity-50 cursor-not-allowed" disabled title="Eliminar">
+                        <Trash2 size={16} className="text-red-600" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
       <div className="flex items-center justify-between pt-2">
