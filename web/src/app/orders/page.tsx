@@ -1,7 +1,8 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, ShoppingCart, Plus } from "lucide-react";
+import { ShoppingCart, Plus } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
+import OrderCard from "@/components/OrderCard";
 
 type OrderRow = {
   id: number;
@@ -92,16 +93,6 @@ export default async function OrdersPage({
     .limit(500);
   const clientSuggest = (clientSuggestRows as ClientSuggestRow[] | null) ?? [];
 
-  function estadoBadge(e?: string | null) {
-    const label = e ?? "-";
-    const cls =
-      e === "completado" ? "badge badge-success" :
-      e === "pendiente" ? "badge badge-warning" :
-      e === "en_proceso" ? "badge badge-info" :
-      e === "cancelado" ? "badge badge-destructive" :
-      "badge";
-    return <span className={cls}>{label}</span>;
-  }
 
   // Seleccionar fuente: usar vista si no filtramos por estado/cliente; si hay estado o cliente, usar tabla orders
   const source = (estadoFilter || clientFilter) ? "orders" : "orders_with_short_code";
@@ -283,49 +274,17 @@ export default async function OrdersPage({
           }
         />
       ) : (
-        <div className="overflow-auto">
-          <table className="table-base table-compact text-center">
-            <thead>
-              <tr>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <a href={`?estado=${encodeURIComponent(estadoFilter)}&from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}&sort=created_at&order=${sortCol === "created_at" && orderParam !== "asc" ? "asc" : "desc"}&page=1`} className="inline-flex items-center gap-1">
-                    Fecha {sortCol === "created_at" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </a>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>Código</th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <a href={`?estado=${encodeURIComponent(estadoFilter)}&from=${encodeURIComponent(fromDate)}&to=${encodeURIComponent(toDate)}&sort=total&order=${sortCol === "total" && orderParam !== "asc" ? "asc" : "desc"}&page=1`} className="inline-flex items-center gap-1">
-                    Total {sortCol === "total" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </a>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>Estado</th>
-                <th className="text-center whitespace-nowrap" style={{ textAlign: "center" }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((o: OrderRow) => (
-                <tr key={o.id}>
-                  <td className="text-center">{o.created_at?.slice(0, 10) ?? o.fecha ?? "-"}</td>
-                  <td className="text-center">#{o.short_code ?? o.shortCode ?? `${o.fecha ?? o.created_at?.slice(0, 10)} - ${o.id}`}</td>
-                  <td className="text-center">${""}{Number(o.total ?? 0).toFixed(2)}</td>
-                  <td className="text-center">{estadoBadge(o.estado)}</td>
-                  <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1 table-actions">
-                      <Link href={`/orders/${o.id}`} aria-label="Ver pedido" title="Ver detalles" className="icon-btn">
-                        <Eye size={16} />
-                      </Link>
-                      <Link href={`/orders/${o.id}/edit`} aria-label="Editar pedido" title="Editar información" className="icon-btn">
-                        <Pencil size={16} />
-                      </Link>
-                      <button aria-label="Eliminar pedido" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {rows.map((o: OrderRow) => (
+            <OrderCard
+              key={o.id}
+              id={String(o.id)}
+              total={o.total}
+              fecha={o.fecha}
+              created_at={o.created_at}
+              estado={o.estado}
+            />
+          ))}
         </div>
       )}
       <div className="flex items-center justify-between pt-2">
