@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, Plus, Package } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
+import ProductCard from "@/components/ProductCard";
 
 type Product = {
   id: string;
@@ -17,10 +18,6 @@ const PAGE_SIZE = 10;
 function num(v: string | string[] | undefined, def = 1) {
   const n = typeof v === "string" ? parseInt(v, 10) : NaN;
   return Number.isFinite(n) && n > 0 ? n : def;
-}
-
-function fmtMoney(n: number) {
-  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // buildQS util se define más abajo con preservación de sort/order/category
@@ -51,17 +48,6 @@ export default async function ProductsPage({
     );
   }
 
-  function stockBadge(stock: number | null) {
-    if (stock == null) return <span className="badge badge-warning">N/D</span>;
-    if (stock <= 0) return <span className="badge badge-destructive">Agotado</span>;
-    if (stock <= 20) return <span className="badge badge-warning">Bajo ({stock})</span>;
-    return <span className="badge badge-success">{stock}</span>;
-  }
-
-  function categoryBadge(cat: string | null) {
-    if (!cat) return <span className="badge">—</span>;
-    return <span className="badge">{cat}</span>;
-  }
 
   const qs = (await searchParams) || {};
   const q = typeof qs.q === "string" ? qs.q.trim() : "";
@@ -130,17 +116,6 @@ export default async function ProductsPage({
     return `?${usp.toString()}`;
   }
 
-  function sortHref(col: string) {
-    const isActive = sortCol === col;
-    const nextOrder = isActive && orderParam !== "asc" ? "asc" : "desc";
-    const usp = new URLSearchParams();
-    if (q) usp.set("q", q);
-    if (selectedCategory) usp.set("category", selectedCategory);
-    usp.set("sort", col);
-    usp.set("order", nextOrder);
-    usp.set("page", "1");
-    return `?${usp.toString()}`;
-  }
 
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-5">
@@ -212,63 +187,18 @@ export default async function ProductsPage({
           }
         />
       ) : (
-        <div className="overflow-auto">
-          <table className="table-base table-compact text-center">
-            <thead>
-              <tr>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("name")} className="inline-flex items-center gap-1">
-                    Nombre {sortCol === "name" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("external_id")} className="inline-flex items-center gap-1">
-                    SKU {sortCol === "external_id" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("price")} className="inline-flex items-center gap-1">
-                    Precio {sortCol === "price" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("stock")} className="inline-flex items-center gap-1">
-                    Stock {sortCol === "stock" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center" style={{ textAlign: "center" }}>
-                  <Link href={sortHref("category")} className="inline-flex items-center gap-1">
-                    Categoría {sortCol === "category" ? (ascending ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ArrowUpDown size={14} />}
-                  </Link>
-                </th>
-                <th className="text-center whitespace-nowrap" style={{ textAlign: "center" }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id}>
-                  <td className="text-center">{p.name}</td>
-                  <td className="text-center">{p.external_id ?? "-"}</td>
-                  <td className="text-center">{p.price != null ? `$${fmtMoney(Number(p.price))}` : "-"}</td>
-                  <td className="text-center">{stockBadge(p.stock)}</td>
-                  <td className="text-center">{categoryBadge(p.category)}</td>
-                  <td className="text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1 table-actions">
-                      <Link href={`/products/${p.id}`} aria-label="Ver producto" title="Ver detalles" className="icon-btn">
-                        <Eye size={16} />
-                      </Link>
-                      <Link href={`/products/${p.id}/edit`} aria-label="Editar producto" title="Editar información" className="icon-btn">
-                        <Pencil size={16} />
-                      </Link>
-                      <button aria-label="Eliminar producto" title="Eliminar (requiere permisos)" className="icon-btn destructive opacity-60 cursor-not-allowed" disabled>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {products.map((p) => (
+            <ProductCard
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              price={p.price}
+              stock={p.stock}
+              category={p.category}
+              external_id={p.external_id}
+            />
+          ))}
         </div>
       )}
 
