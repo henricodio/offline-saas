@@ -195,9 +195,64 @@ Deberías ver:
 - En listado de productos (nueva venta): además de "🔢 Ingresar código" y "🛒 Ver carrito", hay botones "⬅️ Volver" y "🏠 Menú".
 - En resultados de inventario: se muestran botones "⬅️ Volver" y "🏠 Menú" para regresar rápidamente.
 
+## App Web (Next.js) - Mejoras UI Completadas
+
+### Fase 1: Componentes de Fichas (Cards)
+
+- ✅ **OrderCard**: Fichas responsivas para órdenes con estado y total
+- ✅ **ClientCard**: Fichas para clientes con información de contacto
+- ✅ **Dashboard mejorado**: Sección de estado de pedidos (Pendiente, En proceso, Completado, Cancelado)
+
+### Fase 2: Formularios y Tablas
+
+- ✅ **ProductCard**: Fichas para productos con stock visual
+- ✅ **OrderForm**: Formulario mejorado para crear/editar pedidos con items
+- ✅ **Tablas mejoradas**: Diseño limpio con hover effects en `/clients`, `/orders`, `/products`
+
+### Fase 3-5: Detail Cards Modernas
+
+- ✅ **ClientDetailCard**: Ficha moderna con:
+  - Paleta de colores: Azul oscuro (slate-900) + Verde azulado (teal)
+  - Layout 2 columnas: Perfil/Métricas (izq) + Pestañas (der)
+  - Pestañas: Resumen, Interacciones, Notas
+  - Métricas con barras de progreso
+  - Información de contacto con links funcionales
+
+- ✅ **OrderDetailCard**: Ficha para pedidos con:
+  - Información del pedido + Resumen financiero
+  - Pestañas: Resumen, Items, Notas
+  - Badges de estado con colores
+  - Items con barras de progreso
+
+- ✅ **ProductDetailCard**: Ficha para productos con:
+  - Información del producto + Precio
+  - Pestañas: Resumen, Estadísticas, Notas
+  - Alertas visuales: Stock bajo, Agotado
+  - Estadísticas de ventas
+
+### Características Comunes
+
+- ✅ Diseño responsive (mobile-first)
+- ✅ Paleta de colores consistente
+- ✅ Sistema de pestañas funcional
+- ✅ Barras de progreso dinámicas
+- ✅ Gradientes modernos y transiciones suaves
+- ✅ Iconos de Lucide React
+- ✅ TypeScript con tipos específicos
+
+### Páginas Mejoradas
+
+- `/clients` - Tabla con información de clientes
+- `/clients/[id]` - ClientDetailCard moderna
+- `/orders` - Tabla con información de pedidos
+- `/orders/[id]` - OrderDetailCard con items
+- `/products` - Tabla con información de productos
+- `/products/[id]` - ProductDetailCard con estadísticas
+
 ## Futuro
 
-- App web (Next.js) con administración y reportes
+- Búsqueda global (clientes + órdenes + productos)
+- Exportar datos (CSV/PDF)
 - App móvil (React Native) con cache local y sincronización
 - Sincronización bidireccional entre canales
 - Dashboard de métricas en tiempo real
