@@ -56,13 +56,13 @@ export default async function Home({
   const monthEnd = toISODate(new Date(new Date(nextMonthStart).getTime() - 24 * 60 * 60 * 1000));
 
   // KPIs del mes
-  type MonthOrderRow = { total: number | null; cliente_id: string | null };
+  type MonthOrderRow = { total: number | null; cliente_id: string | null; estado?: string | null };
   const [
     { data: monthRows },
     { data: prevMonthRows },
     { data: lastYearRows },
   ] = await Promise.all([
-    sb.from("orders").select("total, cliente_id").gte("fecha", monthStart).lt("fecha", nextMonthStart).limit(50000),
+    sb.from("orders").select("total, cliente_id, estado").gte("fecha", monthStart).lt("fecha", nextMonthStart).limit(50000),
     sb.from("orders").select("total, cliente_id").gte("fecha", prevMonthStart).lt("fecha", monthStart).limit(50000),
     sb.from("orders").select("total, cliente_id").gte("fecha", lastYearMonthStart).lt("fecha", lastYearNextMonthStart).limit(50000),
   ]);
@@ -679,6 +679,32 @@ export default async function Home({
           avgTicketCompare: yearPrevAvg,
         }}
       />
+
+      {/* Estado de pedidos */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium">Estado de pedidos (mes)</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          {(() => {
+            const statusCounts = { pendiente: 0, en_proceso: 0, completado: 0, cancelado: 0 };
+            for (const r of monthRowsData) {
+              const status = (r.estado || 'pendiente') as keyof typeof statusCounts;
+              if (status in statusCounts) statusCounts[status]++;
+            }
+            const statuses = [
+              { key: 'pendiente', label: 'Pendiente', color: 'bg-yellow-50 border-l-yellow-500 text-yellow-800' },
+              { key: 'en_proceso', label: 'En proceso', color: 'bg-blue-50 border-l-blue-500 text-blue-800' },
+              { key: 'completado', label: 'Completado', color: 'bg-green-50 border-l-green-500 text-green-800' },
+              { key: 'cancelado', label: 'Cancelado', color: 'bg-red-50 border-l-red-500 text-red-800' },
+            ];
+            return statuses.map(s => (
+              <Link key={s.key} href={`/orders?estado=${s.key}&from=${monthStart}&to=${monthEnd}`} className={`card p-4 border-l-4 hover:shadow-md transition-shadow cursor-pointer ${s.color}`}>
+                <div className="text-sm font-medium opacity-75">{s.label}</div>
+                <div className="text-2xl font-bold mt-1">{statusCounts[s.key as keyof typeof statusCounts]}</div>
+              </Link>
+            ));
+          })()}
+        </div>
+      </section>
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
