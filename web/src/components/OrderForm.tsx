@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
+import { supabase } from '@/lib/supabase/client';
 
 type OrderItem = {
   id: string;
@@ -14,13 +17,20 @@ type OrderItem = {
 type OrderFormProps = {
   clientSuggest: { id: string; nombre: string | null }[];
   productSuggest: { id: string; name: string; price: number | null }[];
-  onSubmit: (formData: FormData) => Promise<void>;
+  onSubmit?: (formData: FormData) => Promise<void>;
   isLoading?: boolean;
 };
 
-export default function OrderForm({ clientSuggest, productSuggest, onSubmit, isLoading = false }: OrderFormProps) {
+function looksLikeUUID(s: string) {
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
+}
+
+export default function OrderForm({ clientSuggest, productSuggest, onSubmit, isLoading: initialLoading = false }: OrderFormProps) {
+  const router = useRouter();
+  const toast = useToast();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [newItem, setNewItem] = useState({ product: '', quantity: 1, price: 0 });
+  const [isLoading, setIsLoading] = useState(initialLoading);
 
   const today = new Date().toISOString().split('T')[0];
   const total = items.reduce((sum, item) => sum + item.precio_unitario * item.cantidad, 0);
@@ -54,8 +64,83 @@ export default function OrderForm({ clientSuggest, productSuggest, onSubmit, isL
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const clientInput = ((formData.get("client") as string) || "").trim();
+      const fecha = ((formData.get("fecha") as string) || "").trim() || null;
+      const estado = ((formData.get("estado") as string) || "").trim() || "pendiente";
+      const rawTotal = ((formData.get("total") as string) || "").trim();
+      const total = rawTotal !== "" && !Number.isNaN(Number(rawTotal)) ? Number(rawTotal) : null;
+
+      if (!clientInput) {
+        toast.error('Cliente es requerido');
+        setIsLoading(false);
+        return;
+      }
+
+      let cliente_id: string | null = null;
+      if (looksLikeUUID(clientInput)) {
+        cliente_id = clientInput;
+      } else {
+        const { data: found } = await supabase
+          .from("clients")
+          .select("id, nombre")
+          .eq("nombre", clientInput)
+          .limit(1)
+          .maybeSingle();
+        cliente_id = found?.id ?? null;
+      }
+
+      if (!cliente_id) {
+        toast.error('No se encontró el cliente');
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert({ cliente_id, fecha, total, estado })
+        .select("id")
+        .single();
+
+      if (orderError) {
+        toast.error(`Error al crear pedido: ${orderError.message}`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Insertar items si existen
+      if (items.length > 0 && orderData?.id) {
+        const itemsToInsert = items.map((item) => ({
+          order_id: orderData.id,
+          nombre_producto: item.nombre_producto,
+          precio_unitario: item.precio_unitario,
+          cantidad: item.cantidad,
+          total_linea: item.precio_unitario * item.cantidad,
+        }));
+        const { error: itemsError } = await supabase.from("order_items").insert(itemsToInsert);
+        if (itemsError) {
+          toast.warning('Pedido creado pero hubo error al agregar items');
+        }
+      }
+
+      toast.success('Pedido creado exitosamente');
+      setTimeout(() => {
+        router.push("/orders");
+      }, 500);
+    } catch (error) {
+      toast.error('Error inesperado al crear el pedido');
+      console.error(error);
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <form action={onSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Cliente */}
       <div>
         <label className="block text-sm font-medium mb-1">Cliente *</label>
@@ -182,7 +267,11 @@ export default function OrderForm({ clientSuggest, productSuggest, onSubmit, isL
 
       {/* Botones */}
       <div className="flex items-center gap-2">
-        <button type="submit" disabled={isLoading} className="btn btn-primary btn-md">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="btn btn-primary btn-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           {isLoading ? 'Guardando...' : 'Guardar pedido'}
         </button>
         <Link href="/orders" className="btn btn-ghost btn-md">Cancelar</Link>
