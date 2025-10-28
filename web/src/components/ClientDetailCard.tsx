@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Phone, MapPin, ShoppingCart, DollarSign, TrendingUp, MessageSquare, FileText, Plus, Pencil, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, MapPin, ShoppingCart, DollarSign, TrendingUp, MessageSquare, FileText, Plus, Pencil, ArrowLeft, Trash2 } from 'lucide-react';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
 
 type ClientDetailCardProps = {
   client: {
@@ -33,7 +35,9 @@ type ClientDetailCardProps = {
 type TabType = 'resumen' | 'interacciones' | 'notas';
 
 export default function ClientDetailCard({ client, stats, recentOrders }: ClientDetailCardProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('resumen');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const createdDate = client.created_at ? new Date(client.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
   const tel = (client.phone || '').replace(/[^+\d]/g, '');
@@ -59,6 +63,13 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
             <Plus size={16} />
             <span className="text-sm font-medium">Nuevo pedido</span>
           </Link>
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          >
+            <Trash2 size={16} />
+            <span className="text-sm font-medium">Eliminar</span>
+          </button>
         </div>
       </div>
 
@@ -291,6 +302,18 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={showDeleteDialog}
+        title="Eliminar cliente"
+        description={`¿Estás seguro de que deseas eliminar a ${client.nombre}? Esta acción no se puede deshacer.`}
+        itemName={client.nombre}
+        tableName="clients"
+        itemId={client.id}
+        onClose={() => setShowDeleteDialog(false)}
+        onSuccess={() => router.push('/clients')}
+      />
     </div>
   );
 }
