@@ -380,15 +380,15 @@ export default async function Home({
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-6">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500/10 via-indigo-500/10 to-sky-500/10 p-8 border border-orange-500/20 backdrop-blur-sm">
+      <section className="relative overflow-hidden rounded-xl bg-white p-8 border border-gray-200 shadow-sm">
         {/* Decoración de fondo */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="relative z-10">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-[280px]">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900">
                 Bienvenido a FAKTO 👋
               </h1>
               <p className="text-[var(--muted-foreground)] mb-1">
@@ -421,14 +421,14 @@ export default async function Home({
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Clientes activos del mes */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-sky-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Clientes activos</div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="text-sm text-gray-600">Clientes activos</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -443,8 +443,8 @@ export default async function Home({
             {(() => { const pc = pctChange(monthActiveClients, lastYearActiveClients); return (
               <div className={`text-xs ${pc.cls}`}>{pc.label} vs año anterior</div>
             ); })()}
-            <div className="mt-3 pt-3 border-t border-[var(--border)]">
-              <Link href={`/clients?active=1&from=${monthStart}&to=${monthEnd}`} className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1">
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <Link href={`/clients?active=1&from=${monthStart}&to=${monthEnd}`} className="text-xs text-orange-600 hover:underline inline-flex items-center gap-1">
                 Ver detalles →
               </Link>
             </div>
@@ -452,14 +452,14 @@ export default async function Home({
         </div>
 
         {/* Total ventas del mes */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Ventas del mes</div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="text-sm text-gray-600">Ventas del mes</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <DollarSign className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -474,22 +474,22 @@ export default async function Home({
             {(() => { const pc = pctChange(monthTotal, monthYoYTotal); return (
               <div className={`text-xs ${pc.cls}`}>{pc.label} vs año anterior</div>
             ); })()}
-            <div className="mt-3 pt-3 border-t border-[var(--border)] flex gap-3 text-xs">
-              <Link href={`/orders?from=${monthStart}&to=${monthEnd}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">Ver pedidos</Link>
-              <a href={`/api/export/monthly?type=orders&from=${monthStart}&to=${monthEnd}`} className="text-emerald-600 dark:text-emerald-400 hover:underline">CSV ↓</a>
+            <div className="mt-3 pt-3 border-t border-gray-200 flex gap-3 text-xs">
+              <Link href={`/orders?from=${monthStart}&to=${monthEnd}`} className="text-orange-600 hover:underline">Ver pedidos</Link>
+              <a href={`/api/export/monthly?type=orders&from=${monthStart}&to=${monthEnd}`} className="text-orange-600 hover:underline">CSV ↓</a>
             </div>
           </div>
         </div>
 
         {/* Ticket medio del mes */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Ticket medio</div>
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Wallet className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <div className="text-sm text-gray-600">Ticket medio</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Wallet className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -511,14 +511,14 @@ export default async function Home({
       {/* KPIs de HOY */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Pedidos hoy */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-sky-500/10 to-blue-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Pedidos hoy</div>
-              <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ShoppingCart className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <div className="text-sm text-gray-600">Pedidos hoy</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -530,8 +530,8 @@ export default async function Home({
             {(() => { const pc = pctChange(ordersToday, ordersYesterday); return (
               <div className={`text-xs ${pc.cls}`}>{pc.label} vs ayer</div>
             ); })()}
-            <div className="mt-3 pt-3 border-t border-[var(--border)]">
-              <Link href={`/orders?from=${todayStart}&to=${tomorrowStart}`} className="text-xs text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1">
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <Link href={`/orders?from=${todayStart}&to=${tomorrowStart}`} className="text-xs text-orange-600 hover:underline inline-flex items-center gap-1">
                 Ver pedidos →
               </Link>
             </div>
@@ -539,14 +539,14 @@ export default async function Home({
         </div>
 
         {/* Ingresos hoy */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Ingresos hoy</div>
-              <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              <div className="text-sm text-gray-600">Ingresos hoy</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -562,14 +562,14 @@ export default async function Home({
         </div>
 
         {/* Clientes nuevos este mes */}
-        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-rose-500/10 to-pink-500/10 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
+        <div className="card p-6 relative overflow-hidden group hover:shadow-lg transition-all bg-white border border-gray-200">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:scale-110 transition-transform" />
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-[var(--muted-foreground)]">Clientes nuevos</div>
-              <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Users className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              <div className="text-sm text-gray-600">Clientes nuevos</div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-orange-600" />
               </div>
             </div>
             <div
@@ -588,9 +588,9 @@ export default async function Home({
       {/* Productividad + Tendencia compacta */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link href="/tasks?view=okr" className="block">
-          <div className="card p-4 hover:bg-[var(--muted)]/40 transition-colors cursor-pointer h-full bg-gradient-to-br from-indigo-500/5 to-sky-500/5">
+          <div className="card p-4 hover:bg-gray-50 transition-colors cursor-pointer h-full bg-white border border-gray-200">
             <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Target className="w-4 h-4" />
                 <span>Productividad (mes)</span>
               </div>
@@ -616,8 +616,8 @@ export default async function Home({
               </div>
 
               <div className="text-xs mt-1">OKR</div>
-              <div className="w-full bg-gray-200/70 rounded-full h-1.5" aria-label="Progreso OKR promedio">
-                <div className="bg-orange-500 h-1.5 rounded-full transition-all" style={{ width: `${okrAvgProgress ?? 0}%` }} />
+              <div className="w-full bg-gray-200 rounded-full h-1.5" aria-label="Progreso OKR promedio">
+                <div className="bg-orange-600 h-1.5 rounded-full transition-all" style={{ width: `${okrAvgProgress ?? 0}%` }} />
               </div>
               <div className="text-xs text-right">{okrAvgProgress !== null ? `${okrAvgProgress.toFixed(0)}%` : '—'}</div>
             </div>
@@ -691,10 +691,10 @@ export default async function Home({
               if (status in statusCounts) statusCounts[status]++;
             }
             const statuses = [
-              { key: 'pendiente', label: 'Pendiente', color: 'bg-yellow-50 border-l-yellow-500 text-yellow-800' },
-              { key: 'en_proceso', label: 'En proceso', color: 'bg-blue-50 border-l-blue-500 text-blue-800' },
-              { key: 'completado', label: 'Completado', color: 'bg-green-50 border-l-green-500 text-green-800' },
-              { key: 'cancelado', label: 'Cancelado', color: 'bg-red-50 border-l-red-500 text-red-800' },
+              { key: 'pendiente', label: 'Pendiente', color: 'bg-yellow-50 border-l-yellow-500 text-yellow-900' },
+              { key: 'en_proceso', label: 'En proceso', color: 'bg-blue-50 border-l-blue-500 text-blue-900' },
+              { key: 'completado', label: 'Completado', color: 'bg-green-50 border-l-green-500 text-green-900' },
+              { key: 'cancelado', label: 'Cancelado', color: 'bg-red-50 border-l-red-500 text-red-900' },
             ];
             return statuses.map(s => (
               <Link key={s.key} href={`/orders?estado=${s.key}&from=${monthStart}&to=${monthEnd}`} className={`card p-4 border-l-4 hover:shadow-md transition-shadow cursor-pointer ${s.color}`}>
