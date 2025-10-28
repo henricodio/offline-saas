@@ -5,6 +5,7 @@ import { pctChange, fmtMoney } from "@/utils/dashboardUtils";
 import TimeSeriesPanel from "@/components/TimeSeriesPanel";
 import BreakdownsPanel from "@/components/BreakdownsPanel";
 import PendingTasksCard from "@/components/PendingTasksCard";
+import BotSyncStatus from "@/components/BotSyncStatus";
 import { Target, TrendingUp, CheckCircle2, Clock3, Plus, Users, DollarSign, ShoppingCart, Wallet } from "lucide-react";
 
 type OrderRow = {
@@ -379,6 +380,9 @@ export default async function Home({
 
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-6">
+      {/* Bot Sync Status */}
+      <BotSyncStatus />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-xl bg-white p-8 border border-gray-200 shadow-sm">
         {/* Decoración de fondo */}
