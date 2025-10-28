@@ -12,22 +12,22 @@ function trunc(str, maxLen) {
 }
 
 /**
- * Teclado del menú principal
+ * Teclado del menú principal - Mejorado
  */
 function getMainMenuKeyboard() {
   const WEB_URL = process.env.WEB_BASE_URL || 'http://localhost:3000';
   const isHttps = typeof WEB_URL === 'string' && /^https:\/\//i.test(WEB_URL.trim());
   return [
     [
-      { text: 'Gestión Cliente', callback_data: 'menu:clients' },
-      { text: 'Nueva Venta', callback_data: 'menu:new_order' }
+      { text: '👥 Gestión de Clientes', callback_data: 'menu:clients' },
+      { text: '🛒 Nueva Venta', callback_data: 'menu:new_order' }
     ],
     [
-      { text: 'Consultar ventas', callback_data: 'sales:view_orders' },
-      { text: 'Inventario', callback_data: 'menu:inventory' }
+      { text: '📋 Consultar Ventas', callback_data: 'sales:view_orders' },
+      { text: '📦 Inventario', callback_data: 'menu:inventory' }
     ],
     [
-      { text: '📊 KPIs', callback_data: 'menu:kpis' }
+      { text: '📊 KPIs y Reportes', callback_data: 'menu:kpis' }
     ],
     isHttps
       ? [ { text: '🌐 Abrir Web', url: WEB_URL } ]
@@ -36,65 +36,77 @@ function getMainMenuKeyboard() {
 }
 
 /**
- * Teclado del submenú de KPIs
+ * Teclado del submenú de KPIs - Mejorado
  */
 function getKpisMenuKeyboard() {
   return [
     [
       { text: '📅 Últimos 7 días', callback_data: 'kpis:weekly' },
-      { text: '🗓 Mes actual (YoY)', callback_data: 'kpis:monthly' }
+      { text: '📊 Mes actual', callback_data: 'kpis:monthly' }
     ],
     [
-      { text: '🏠 Menú Principal', callback_data: 'back:main' }
+      { text: '🔝 Top Clientes', callback_data: 'kpis:top_clients' },
+      { text: '⭐ Productos Top', callback_data: 'kpis:top_products' }
+    ],
+    [
+      { text: '⬅️ Volver', callback_data: 'back:main' }
     ]
   ];
 }
 
 /**
- * Teclado del menú de clientes
+ * Teclado del menú de clientes - Mejorado
  */
 function getClientsMenuKeyboard() {
   return [
     [
-      { text: 'Ver clientes', callback_data: 'clients:view' },
-      { text: 'Nuevo cliente', callback_data: 'clients:new' }
+      { text: '📋 Ver Clientes', callback_data: 'clients:view' },
+      { text: '➕ Nuevo Cliente', callback_data: 'clients:new' }
     ],
     [
-      { text: 'Editar cliente', callback_data: 'clients:edit' },
-      { text: 'Buscar cliente', callback_data: 'clients:search' }
+      { text: '✏️ Editar Cliente', callback_data: 'clients:edit' },
+      { text: '🔍 Buscar Cliente', callback_data: 'clients:search' }
     ],
     [
-      { text: '🏠 Menú Principal', callback_data: 'back:main' }
+      { text: '⬅️ Volver', callback_data: 'back:main' }
     ]
   ];
 }
 
 /**
- * Teclado del menú de inventario
+ * Teclado del menú de inventario - Mejorado
  */
 function getInventoryMenuKeyboard() {
   return [
     [
-      { text: 'Buscar producto', callback_data: 'inventory:search' },
-      { text: 'Nuevo producto', callback_data: 'inventory:new' }
+      { text: '🔍 Buscar Producto', callback_data: 'inventory:search' },
+      { text: '➕ Nuevo Producto', callback_data: 'inventory:new' }
     ],
     [
-      { text: '🏠 Menú Principal', callback_data: 'back:main' }
+      { text: '⚠️ Stock Bajo', callback_data: 'inventory:low_stock' },
+      { text: '📊 Resumen Stock', callback_data: 'inventory:summary' }
+    ],
+    [
+      { text: '⬅️ Volver', callback_data: 'back:main' }
     ]
   ];
 }
 
 /**
- * Teclado del submenú de consultar ventas
+ * Teclado del submenú de consultar ventas - Mejorado
  */
 function getSalesConsultMenuKeyboard() {
   return [
     [
-      { text: 'Por fecha 📅', callback_data: 'sales:by_date' },
-      { text: 'Por cliente 👤', callback_data: 'sales:by_client' }
+      { text: '📅 Por Fecha', callback_data: 'sales:by_date' },
+      { text: '👤 Por Cliente', callback_data: 'sales:by_client' }
     ],
     [
-      { text: '🏠 Menú Principal', callback_data: 'back:main' }
+      { text: '📊 Resumen Hoy', callback_data: 'sales:today' },
+      { text: '📈 Resumen Mes', callback_data: 'sales:month' }
+    ],
+    [
+      { text: '⬅️ Volver', callback_data: 'back:main' }
     ]
   ];
 }
@@ -297,21 +309,21 @@ function buildClientsOrdersListKeyboard(clients, page, count) {
 }
 
 /**
- * Teclado para opciones de cliente individual (ficha)
+ * Teclado para opciones de cliente individual (ficha) - Mejorado
  */
 function getClientDetailsKeyboard(clientId) {
   return [
     [
-      { text: '🛒 Nueva venta', callback_data: `client:new_order:${clientId}` },
-      { text: '🧾 Consultar ventas', callback_data: `client:view_orders:${clientId}:0` }
+      { text: '🛒 Nueva Venta', callback_data: `client:new_order:${clientId}` },
+      { text: '📋 Ver Ventas', callback_data: `client:view_orders:${clientId}:0` }
     ],
     [
       { text: '✏️ Editar', callback_data: `client:edit:${clientId}` },
-      { text: '🗑️ Eliminar', callback_data: `client:delete:${clientId}` }
+      { text: '📞 Contactar', callback_data: `client:contact:${clientId}` }
     ],
     [
-      { text: '⬅️ Lista', callback_data: 'clients:view' },
-      { text: 'Volver', callback_data: 'back:clients' }
+      { text: '⬅️ Volver a Lista', callback_data: 'clients:view' },
+      { text: '🏠 Menú Principal', callback_data: 'back:main' }
     ]
   ];
 }
