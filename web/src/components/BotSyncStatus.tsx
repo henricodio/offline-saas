@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { MessageCircle, RefreshCw } from 'lucide-react';
 
 interface SyncStats {
   clients: number;
@@ -12,23 +12,27 @@ interface SyncStats {
 
 export default function BotSyncStatus() {
   const [stats, setStats] = useState<SyncStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const response = await fetch('/api/bot-sync?action=stats');
+      const response = await fetch('/api/bot-sync?action=stats', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!response.ok) {
+        console.error('API error:', response.status);
+        return;
+      }
+      
       const data = await response.json();
-
-      if (data.ok) {
+      if (data.ok && data.stats) {
         setStats(data.stats);
-      } else {
-        setError(data.error || 'Error fetching stats');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -39,18 +43,6 @@ export default function BotSyncStatus() {
     const interval = setInterval(fetchStats, 30000); // Actualizar cada 30 segundos
     return () => clearInterval(interval);
   }, []);
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-        <AlertCircle className="text-red-600" size={20} />
-        <div>
-          <p className="text-sm font-medium text-red-900">Error de sincronización</p>
-          <p className="text-xs text-red-700">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
