@@ -20,24 +20,24 @@ export async function GET(request: NextRequest) {
 
     if (action === 'stats') {
       // Obtener estadísticas
-      const { data: clients } = await supabase
+      const { count: clientsCount } = await supabase
         .from('clients')
-        .select('count', { count: 'exact' });
+        .select('*', { count: 'exact', head: true });
 
-      const { data: orders } = await supabase
+      const { count: ordersCount } = await supabase
         .from('orders')
-        .select('count', { count: 'exact' });
+        .select('*', { count: 'exact', head: true });
 
-      const { data: products } = await supabase
+      const { count: productsCount } = await supabase
         .from('products')
-        .select('count', { count: 'exact' });
+        .select('*', { count: 'exact', head: true });
 
       return NextResponse.json({
         ok: true,
         stats: {
-          clients: clients?.length || 0,
-          orders: orders?.length || 0,
-          products: products?.length || 0,
+          clients: clientsCount || 0,
+          orders: ordersCount || 0,
+          products: productsCount || 0,
           lastSync: new Date().toISOString(),
         },
       });
