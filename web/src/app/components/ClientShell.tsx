@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LayoutDashboard, ShoppingCart, Users, Package, Calendar, X, Sun, Moon, MapPin, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
+import GlobalSearch from "@/components/GlobalSearch";
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ComponentType<{ size?: number }>; }) {
   const pathname = usePathname();
@@ -99,6 +100,11 @@ const [open, setOpen] = useState(false);
             >
               <Menu size={20} />
             </button>
+            
+            {/* Global Search */}
+            <div className="hidden md:flex flex-1 max-w-md">
+              <GlobalSearch />
+            </div>
             
             <div className="ml-auto flex items-center gap-2">
               <button
