@@ -6,6 +6,7 @@ const { getSupabaseClient } = require('./supabase');
 const { initializeCommandHandler, registerCommands } = require('./handlers/commands');
 const { initializeCallbackHandler, handleCallbackQuery } = require('./handlers/callbacks');
 const { initializeMessageHandler, handleMessage } = require('./handlers/messages');
+const { initializeTaskHandler, showTasksMenu, startCreateTaskFlow, handleTaskInput, listTasks, markTaskComplete, deleteTask, sendTaskReminders } = require('./handlers/tasks');
 const { logger } = require('./utils/errorHandler');
 const keyboards = require('./ui/keyboards');
 
@@ -1560,6 +1561,7 @@ function initializeBot() {
   initializeCommandHandler(dependencies);
   initializeCallbackHandler(dependencies);
   initializeMessageHandler(dependencies);
+  initializeTaskHandler(dependencies);
   
   // Registrar comandos
   registerCommands();

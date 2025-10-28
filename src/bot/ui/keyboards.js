@@ -27,6 +27,7 @@ function getMainMenuKeyboard() {
       { text: '📦 Inventario', callback_data: 'menu:inventory' }
     ],
     [
+      { text: '📌 Mis Tareas', callback_data: 'menu:tasks' },
       { text: '📊 KPIs y Reportes', callback_data: 'menu:kpis' }
     ],
     isHttps
