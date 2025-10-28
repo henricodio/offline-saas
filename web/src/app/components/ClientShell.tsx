@@ -6,6 +6,7 @@ import { useState } from "react";
 import { LayoutDashboard, ShoppingCart, Users, Package, Calendar, X, Sun, Moon, MapPin, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import GlobalSearch from "@/components/GlobalSearch";
+import TelegramBotButton from "@/components/TelegramBotButton";
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ComponentType<{ size?: number }>; }) {
   const pathname = usePathname();
@@ -107,6 +108,7 @@ const [open, setOpen] = useState(false);
             </div>
             
             <div className="ml-auto flex items-center gap-2">
+              <TelegramBotButton />
               <button
                 type="button"
                 aria-label="Cambiar tema"
@@ -124,7 +126,6 @@ const [open, setOpen] = useState(false);
                 {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
                 <span className="hidden md:inline">Tema</span>
               </button>
-              {/* Espaciador / acciones adicionales aquí si se necesitan */}
             </div>
           </div>
         </header>
