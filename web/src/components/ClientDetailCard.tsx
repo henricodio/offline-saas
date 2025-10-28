@@ -43,19 +43,19 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
   const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 p-4 md:p-6">
       {/* Header con navegación */}
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/clients" className="inline-flex items-center gap-2 text-slate-400 hover:text-teal-400 transition-colors">
+        <Link href="/clients" className="inline-flex items-center gap-2 text-dark-500 hover:text-cyan-400 transition-colors">
           <ArrowLeft size={20} />
           <span className="text-sm font-medium">Volver a clientes</span>
         </Link>
         <div className="flex gap-2">
-          <Link href={`/clients/${client.id}/edit`} className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+          <Link href={`/clients/${client.id}/edit`} className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors">
             <Pencil size={16} />
             <span className="text-sm font-medium">Editar</span>
           </Link>
-          <Link href="/orders/new" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          <Link href="/orders/new" className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
             <Plus size={16} />
             <span className="text-sm font-medium">Nuevo pedido</span>
           </Link>
@@ -67,32 +67,32 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
         {/* Columna izquierda - Perfil y métricas */}
         <div className="lg:col-span-1 space-y-6">
           {/* Tarjeta de perfil */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-700 shadow-xl">
+          <div className="bg-gradient-to-br from-dark-800 to-dark-700 rounded-xl p-6 border border-dark-700 shadow-xl">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
                 {client.nombre.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold text-white truncate">{client.nombre}</h1>
-                <p className="text-sm text-slate-400">Cliente desde {createdDate}</p>
+                <p className="text-sm text-dark-400">Cliente desde {createdDate}</p>
               </div>
             </div>
 
             {/* Información de contacto */}
-            <div className="space-y-3 pt-6 border-t border-slate-600">
+            <div className="space-y-3 pt-6 border-t border-dark-600">
               {client.contacto && (
-                <div className="flex items-center gap-3 text-slate-300 hover:text-teal-400 transition-colors">
-                  <Mail size={18} className="text-teal-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 text-dark-300 hover:text-cyan-400 transition-colors">
+                  <Mail size={18} className="text-cyan-400 flex-shrink-0" />
                   <a href={`mailto:${client.contacto}`} className="text-sm truncate hover:underline">
                     {client.contacto}
                   </a>
                 </div>
               )}
               {client.phone && (
-                <div className="flex items-center gap-3 text-slate-300">
-                  <Phone size={18} className="text-teal-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 text-dark-300">
+                  <Phone size={18} className="text-cyan-400 flex-shrink-0" />
                   <div className="flex gap-2 text-sm">
-                    <a href={`tel:${client.phone}`} className="hover:text-teal-400 transition-colors">
+                    <a href={`tel:${client.phone}`} className="hover:text-cyan-400 transition-colors">
                       {client.phone}
                     </a>
                     {waLink && (
@@ -104,13 +104,13 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                 </div>
               )}
               {client.direccion && (
-                <div className="flex items-start gap-3 text-slate-300">
-                  <MapPin size={18} className="text-teal-400 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 text-dark-300">
+                  <MapPin size={18} className="text-cyan-400 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
                     <p>{client.direccion}</p>
-                    {client.city && <p className="text-slate-400">{client.city}</p>}
+                    {client.city && <p className="text-dark-400">{client.city}</p>}
                     {mapsLink && (
-                      <a href={mapsLink} target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:text-teal-300 transition-colors text-xs mt-1 inline-block">
+                      <a href={mapsLink} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 transition-colors text-xs mt-1 inline-block">
                         Ver en Google Maps →
                       </a>
                     )}
@@ -118,8 +118,8 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                 </div>
               )}
               {client.route && (
-                <div className="flex items-center gap-3 text-slate-300">
-                  <TrendingUp size={18} className="text-teal-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 text-dark-300">
+                  <TrendingUp size={18} className="text-cyan-400 flex-shrink-0" />
                   <span className="text-sm">Ruta: {client.route}</span>
                 </div>
               )}
@@ -127,20 +127,20 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
           </div>
 
           {/* Tarjeta de métricas */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-700 shadow-xl space-y-4">
+          <div className="bg-gradient-to-br from-dark-800 to-dark-700 rounded-xl p-6 border border-dark-700 shadow-xl space-y-4">
             <h3 className="text-lg font-semibold text-white mb-4">Métricas</h3>
 
             {/* Pedidos totales */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <ShoppingCart size={16} className="text-blue-400" />
-                  <span className="text-sm text-slate-300">Pedidos totales</span>
+                  <ShoppingCart size={16} className="text-cyan-400" />
+                  <span className="text-sm text-dark-300">Pedidos totales</span>
                 </div>
                 <span className="text-2xl font-bold text-white">{stats.ordersCount}</span>
               </div>
-              <div className="w-full bg-slate-600 rounded-full h-2">
-                <div className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.ordersCount / 50) * 100)}%` }} />
+              <div className="w-full bg-dark-600 rounded-full h-2">
+                <div className="bg-gradient-to-r from-cyan-400 to-cyan-600 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.ordersCount / 50) * 100)}%` }} />
               </div>
             </div>
 
@@ -148,13 +148,13 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <DollarSign size={16} className="text-green-400" />
-                  <span className="text-sm text-slate-300">Total gastado</span>
+                  <DollarSign size={16} className="text-accent-400" />
+                  <span className="text-sm text-dark-300">Total gastado</span>
                 </div>
                 <span className="text-2xl font-bold text-white">${fmt(stats.totalSpent)}</span>
               </div>
-              <div className="w-full bg-slate-600 rounded-full h-2">
-                <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.totalSpent / 10000) * 100)}%` }} />
+              <div className="w-full bg-dark-600 rounded-full h-2">
+                <div className="bg-gradient-to-r from-accent-400 to-accent-600 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.totalSpent / 10000) * 100)}%` }} />
               </div>
             </div>
 
@@ -163,11 +163,11 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-teal-400" />
-                  <span className="text-sm text-slate-300">Ticket promedio</span>
+                  <span className="text-sm text-dark-300">Ticket promedio</span>
                 </div>
                 <span className="text-2xl font-bold text-white">${fmt(stats.avgOrder)}</span>
               </div>
-              <div className="w-full bg-slate-600 rounded-full h-2">
+              <div className="w-full bg-dark-600 rounded-full h-2">
                 <div className="bg-gradient-to-r from-teal-400 to-teal-600 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.avgOrder / 1000) * 100)}%` }} />
               </div>
             </div>
@@ -176,15 +176,15 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
 
         {/* Columna derecha - Pestañas y contenido */}
         <div className="lg:col-span-2">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl border border-slate-700 shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-br from-dark-800 to-dark-700 rounded-xl border border-dark-700 shadow-xl overflow-hidden">
             {/* Pestañas */}
-            <div className="flex border-b border-slate-600 bg-slate-800/50">
+            <div className="flex border-b border-dark-600 bg-dark-800/50">
               <button
                 onClick={() => setActiveTab('resumen')}
                 className={`flex-1 px-4 py-4 text-sm font-medium transition-all ${
                   activeTab === 'resumen'
-                    ? 'text-teal-400 border-b-2 border-teal-400 bg-slate-700/50'
-                    : 'text-slate-400 hover:text-slate-300'
+                    ? 'text-cyan-400 border-b-2 border-cyan-400 bg-dark-700/50'
+                    : 'text-dark-400 hover:text-dark-300'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -196,8 +196,8 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                 onClick={() => setActiveTab('interacciones')}
                 className={`flex-1 px-4 py-4 text-sm font-medium transition-all ${
                   activeTab === 'interacciones'
-                    ? 'text-teal-400 border-b-2 border-teal-400 bg-slate-700/50'
-                    : 'text-slate-400 hover:text-slate-300'
+                    ? 'text-cyan-400 border-b-2 border-cyan-400 bg-dark-700/50'
+                    : 'text-dark-400 hover:text-dark-300'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -209,8 +209,8 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                 onClick={() => setActiveTab('notas')}
                 className={`flex-1 px-4 py-4 text-sm font-medium transition-all ${
                   activeTab === 'notas'
-                    ? 'text-teal-400 border-b-2 border-teal-400 bg-slate-700/50'
-                    : 'text-slate-400 hover:text-slate-300'
+                    ? 'text-cyan-400 border-b-2 border-cyan-400 bg-dark-700/50'
+                    : 'text-dark-400 hover:text-dark-300'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -226,17 +226,17 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4">Últimos pedidos</h3>
                   {recentOrders.length === 0 ? (
-                    <p className="text-slate-400 text-center py-8">No hay pedidos registrados</p>
+                    <p className="text-dark-400 text-center py-8">No hay pedidos registrados</p>
                   ) : (
                     <div className="space-y-3">
                       {recentOrders.map((order) => (
                         <Link
                           key={order.id}
                           href={`/orders/${order.id}`}
-                          className="block p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors border border-slate-600 hover:border-teal-500"
+                          className="block p-4 bg-dark-700/50 hover:bg-dark-700 rounded-lg transition-colors border border-dark-600 hover:border-cyan-500"
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-mono text-sm text-teal-400">#{order.id.slice(0, 8)}</span>
+                            <span className="font-mono text-sm text-cyan-400">#{order.id.slice(0, 8)}</span>
                             <span className={`text-xs font-medium px-2 py-1 rounded ${
                               order.estado === 'completado' ? 'bg-green-900 text-green-200' :
                               order.estado === 'pendiente' ? 'bg-yellow-900 text-yellow-200' :
@@ -247,7 +247,7 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-400">{order.fecha ?? order.created_at?.slice(0, 10) ?? '-'}</span>
+                            <span className="text-xs text-dark-400">{order.fecha ?? order.created_at?.slice(0, 10) ?? '-'}</span>
                             <span className="text-white font-semibold">${(Number(order.total ?? 0)).toFixed(2)}</span>
                           </div>
                         </Link>
@@ -262,16 +262,16 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
                   <h3 className="text-lg font-semibold text-white mb-4">Historial de interacciones</h3>
                   <div className="space-y-3">
                     {recentOrders.map((order) => (
-                      <div key={order.id} className="flex gap-4 pb-4 border-b border-slate-600 last:border-0">
+                      <div key={order.id} className="flex gap-4 pb-4 border-b border-dark-600 last:border-0">
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-600 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-teal-600 flex items-center justify-center">
                             <ShoppingCart size={16} className="text-white" />
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-white">Pedido creado</p>
-                          <p className="text-xs text-slate-400">{order.fecha ?? order.created_at?.slice(0, 10) ?? '-'}</p>
-                          <p className="text-sm text-teal-400 mt-1">${(Number(order.total ?? 0)).toFixed(2)}</p>
+                          <p className="text-xs text-dark-400">{order.fecha ?? order.created_at?.slice(0, 10) ?? '-'}</p>
+                          <p className="text-sm text-cyan-400 mt-1">${(Number(order.total ?? 0)).toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
@@ -282,8 +282,8 @@ export default function ClientDetailCard({ client, stats, recentOrders }: Client
               {activeTab === 'notas' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4">Notas</h3>
-                  <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600 border-dashed">
-                    <p className="text-slate-400 text-center text-sm">No hay notas registradas. Agrega notas para recordar detalles importantes sobre este cliente.</p>
+                  <div className="p-4 bg-dark-700/50 rounded-lg border border-dark-600 border-dashed">
+                    <p className="text-dark-400 text-center py-8">No hay notas registradas. Agrega notas para recordar detalles importantes sobre este cliente.</p>
                   </div>
                 </div>
               )}
