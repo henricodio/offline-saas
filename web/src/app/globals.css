@@ -88,43 +88,44 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.01 260);
-  --foreground: oklch(0.95 0.005 85);
-  --card: oklch(0.16 0.01 260);
-  --card-foreground: oklch(0.95 0.005 85);
-  --popover: oklch(0.16 0.01 260);
-  --popover-foreground: oklch(0.95 0.005 85);
-  --primary: oklch(0.72 0.2 40); /* naranja en dark */
-  --primary-foreground: oklch(0.12 0.01 260);
-  --secondary: oklch(0.22 0.01 260);
-  --secondary-foreground: oklch(0.95 0.005 85);
-  --muted: oklch(0.2 0.01 260);
-  --muted-foreground: oklch(0.7 0.02 85);
-  --accent: oklch(0.24 0.02 200);
-  --accent-foreground: oklch(0.95 0.005 85);
-  --destructive: oklch(0.62 0.22 25);
-  --destructive-foreground: oklch(0.12 0.01 260);
-  --border: oklch(0.26 0.01 260);
-  --input: oklch(0.24 0.01 260);
+  /* Mantener fondo blanco incluso en dark mode */
+  --background: oklch(0.99 0 0); /* blanco */
+  --foreground: oklch(0.14 0 0); /* casi negro */
+  --card: oklch(0.995 0 0);
+  --card-foreground: oklch(0.14 0 0);
+  --popover: oklch(0.995 0 0);
+  --popover-foreground: oklch(0.14 0 0);
+  --primary: oklch(0.78 0.18 40); /* naranja brand */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.01 0); /* gris muy claro */
+  --secondary-foreground: oklch(0.28 0.01 0);
+  --muted: oklch(0.95 0.01 0);
+  --muted-foreground: oklch(0.52 0.01 0);
+  --accent: oklch(0.9 0.03 80); /* un azul suave que combina */
+  --accent-foreground: oklch(0.18 0.01 0);
+  --destructive: oklch(0.68 0.2 25); /* rojo */
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.9 0.01 0);
+  --input: oklch(0.93 0.01 0);
   --ring: var(--primary);
-  --chart-1: oklch(0.72 0.2 40);
-  --chart-2: oklch(0.7 0.15 200);
-  --chart-3: oklch(0.68 0.18 320);
-  --chart-4: oklch(0.76 0.12 160);
-  --chart-5: oklch(0.78 0.1 120);
-  --sidebar: oklch(0.14 0.01 260);
-  --sidebar-foreground: oklch(0.95 0.005 85);
+  --chart-1: oklch(0.78 0.18 40); /* naranja */
+  --chart-2: oklch(0.75 0.12 200); /* azul */
+  --chart-3: oklch(0.82 0.14 80); /* ámbar */
+  --chart-4: oklch(0.7 0.12 160); /* verde-azulado */
+  --chart-5: oklch(0.7 0.15 320); /* magenta */
+  --sidebar: oklch(0.99 0 0); /* blanco para sidebar */
+  --sidebar-foreground: oklch(0.14 0 0);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: oklch(0.22 0.01 260);
-  --sidebar-accent-foreground: oklch(0.95 0.005 85);
-  --sidebar-border: oklch(0.26 0.01 260);
+  --sidebar-accent: oklch(0.95 0.01 0);
+  --sidebar-accent-foreground: oklch(0.28 0.01 0);
+  --sidebar-border: oklch(0.9 0.01 0);
   --sidebar-ring: var(--primary);
 
-  /* Custom calendar colors for dark mode */
-  --note-color: oklch(0.62 0.12 200);
-  --task-color: oklch(0.6 0.16 40);
-  --reminder-color: oklch(0.62 0.1 200);
+  /* Custom calendar colors - mantener claros */
+  --note-color: oklch(0.9 0.07 80);   /* acorde a acento */
+  --task-color: oklch(0.82 0.14 40);  /* naranja claro */
+  --reminder-color: oklch(0.9 0.06 200); /* azul claro */
 }
 
 @layer base {
