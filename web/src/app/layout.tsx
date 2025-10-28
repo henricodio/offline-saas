@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientShell from "./components/ClientShell";
 import { ThemeProvider } from "next-themes";
+import { ToastWrapper } from "./components/ToastWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,9 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ClientShell>{children}</ClientShell>
+          <ToastWrapper>
+            <ClientShell>{children}</ClientShell>
+          </ToastWrapper>
         </ThemeProvider>
       </body>
     </html>
