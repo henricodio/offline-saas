@@ -380,8 +380,10 @@ export default async function Home({
 
   return (
     <main className="max-w-5xl mx-auto p-6 space-y-6">
-      {/* Bot Sync Status */}
-      <BotSyncStatus />
+      {/* Bot Sync Status - Renderizado en cliente */}
+      <div suppressHydrationWarning>
+        <BotSyncStatus />
+      </div>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-xl bg-white p-8 border border-gray-200 shadow-sm">
