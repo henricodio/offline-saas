@@ -4,14 +4,12 @@ import { MessageCircle, ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function TelegramBotButton() {
-  const [botUsername, setBotUsername] = useState<string | null>(null);
   const [botUrl, setBotUrl] = useState<string>('');
 
   useEffect(() => {
     // Obtener el nombre del bot desde variables de entorno
     const username = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
     if (username) {
-      setBotUsername(username);
       setBotUrl(`https://t.me/${username}`);
     }
   }, []);
@@ -21,19 +19,10 @@ export default function TelegramBotButton() {
   }
 
   const handleOpenBot = () => {
-    // Intentar abrir en Telegram app primero, luego en web
-    const telegramAppUrl = `tg://resolve?domain=${botUsername}`;
-    const telegramWebUrl = botUrl;
-
-    // Intentar abrir en app
-    const link = document.createElement('a');
-    link.href = telegramAppUrl;
-    link.click();
-
-    // Si no funciona, abrir en web después de 1 segundo
-    setTimeout(() => {
-      window.open(telegramWebUrl, '_blank');
-    }, 1000);
+    // Abrir directamente en Telegram Web (más confiable)
+    if (botUrl) {
+      window.open(botUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
