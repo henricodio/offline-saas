@@ -12,13 +12,14 @@ type Product = {
   created_at: string | null;
 };
 
-export default async function ProductDetail({ params }: { params: { id: string } }) {
+export default async function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const sb = supabaseServer;
 
   const { data: productRow, error: pErr } = await sb
     .from("products")
     .select("id, name, price, stock, category, external_id, created_at")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (pErr) console.error(pErr);

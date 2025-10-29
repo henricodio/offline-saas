@@ -22,21 +22,22 @@ type OrderRow = {
   estado?: string | null;
 };
 
-export default async function ClientDetail({ params }: { params: { id: string } }) {
+export default async function ClientDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const sb = supabaseServer;
 
   const { data: clientRow, error: cErr } = await sb
     .from("clients")
     .select("id, nombre, contacto, direccion, phone, route, city, created_at")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
   if (cErr) console.error(cErr);
   if (!clientRow) return notFound();
   const client: Client = clientRow as Client;
 
   const [countRes, ordersTotalRes] = await Promise.all([
-    sb.from("orders").select("id", { count: "exact", head: true }).eq("cliente_id", params.id),
-    sb.from("orders").select("total").eq("cliente_id", params.id).limit(10000),
+    sb.from("orders").select("id", { count: "exact", head: true }).eq("cliente_id", id),
+    sb.from("orders").select("total").eq("cliente_id", id).limit(10000),
   ]);
   const ordersCount = countRes.count ?? 0;
   const totalSpent = (ordersTotalRes.data ?? []).reduce((acc: number, r: { total: number | null }) => acc + Number(r.total ?? 0), 0);
@@ -47,7 +48,7 @@ export default async function ClientDetail({ params }: { params: { id: string } 
     const { data, error } = await sb
       .from("orders_with_short_code")
       .select("id, total, fecha, created_at, short_code")
-      .eq("cliente_id", params.id)
+      .eq("cliente_id", id)
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) throw error;
@@ -56,7 +57,7 @@ export default async function ClientDetail({ params }: { params: { id: string } 
     const { data } = await sb
       .from("orders")
       .select("id, total, fecha, created_at")
-      .eq("cliente_id", params.id)
+      .eq("cliente_id", id)
       .order("created_at", { ascending: false })
       .limit(10);
     recent = (data as OrderRow[]) ?? [];

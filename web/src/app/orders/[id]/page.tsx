@@ -22,7 +22,8 @@ type OrderItem = {
   total_linea: number;
 };
 
-export default async function OrderDetail({ params }: { params: { id: string } }) {
+export default async function OrderDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const sb = supabaseServer;
 
   // Intentar traer short_code si la vista existe
@@ -31,7 +32,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
     const { data, error } = await sb
       .from("orders_with_short_code")
       .select("id, fecha, created_at, estado, total, cliente_id, short_code, clients ( id, nombre )")
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
     if (error) throw error;
     order = data as unknown as Order;
@@ -39,7 +40,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
     const { data } = await sb
       .from("orders")
       .select("id, fecha, created_at, estado, total, cliente_id, clients ( id, nombre )")
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
     order = (data as unknown as Order) ?? null;
   }
@@ -49,7 +50,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
   const { data: items } = await sb
     .from("order_items")
     .select("id, order_id, nombre_producto, precio_unitario, cantidad, total_linea")
-    .eq("order_id", params.id)
+    .eq("order_id", id)
     .order("created_at", { ascending: true });
 
   const lines = (items as OrderItem[]) ?? [];

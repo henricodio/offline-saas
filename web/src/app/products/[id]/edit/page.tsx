@@ -3,12 +3,13 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import ProductForm from "@/components/ProductForm";
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const sb = supabaseServer;
   const { data: product, error } = await sb
     .from("products")
     .select("id, name, external_id, category, price, stock")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error) return notFound();
