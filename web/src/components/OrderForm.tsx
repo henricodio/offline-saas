@@ -25,7 +25,7 @@ function looksLikeUUID(s: string) {
   return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
 }
 
-export default function OrderForm({ clientSuggest, productSuggest, onSubmit, isLoading: initialLoading = false }: OrderFormProps) {
+export default function OrderForm({ clientSuggest, productSuggest, isLoading: initialLoading = false }: OrderFormProps) {
   const router = useRouter();
   const toast = useToast();
   const [items, setItems] = useState<OrderItem[]>([]);

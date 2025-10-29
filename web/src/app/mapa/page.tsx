@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, MapPin, User, Plus, CheckCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, Plus, CheckCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -164,16 +164,6 @@ export default function VisitsTracker() {
       case "pending": return "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400";
       case "completed": return "bg-green-500/20 text-green-700 dark:text-green-400";
       case "cancelled": return "bg-red-500/20 text-red-700 dark:text-red-400";
-      default: return "bg-gray-500/20 text-gray-700 dark:text-gray-400";
-    }
-  };
-
-  const getTypeColor = (type: Visit["type"]) => {
-    switch (type) {
-      case "maintenance": return "bg-blue-500/20 text-blue-700 dark:text-blue-400";
-      case "consultation": return "bg-purple-500/20 text-purple-700 dark:text-purple-400";
-      case "installation": return "bg-green-500/20 text-green-700 dark:text-green-400";
-      case "follow-up": return "bg-orange-500/20 text-orange-700 dark:text-orange-400";
       default: return "bg-gray-500/20 text-gray-700 dark:text-gray-400";
     }
   };

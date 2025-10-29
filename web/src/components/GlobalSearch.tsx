@@ -106,7 +106,7 @@ export default function GlobalSearch() {
 
           {!isLoading && results.length === 0 && query && (
             <div className="p-4 text-center text-gray-500">
-              No se encontraron resultados para "{query}"
+              No se encontraron resultados para &quot;{query}&quot;
             </div>
           )}
 

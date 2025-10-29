@@ -65,7 +65,6 @@ export default function TasksAgenda() {
   const groups: { title: string; filter: (t: Task) => boolean }[] = [];
   const todayKey = toISODate(today);
   const tomorrowKey = toISODate(addDays(today, 1));
-  const weekStart = toISODate(startOfWeek(today));
   const weekEnd = toISODate(endOfWeek(today));
 
   groups.push({ title: "Atrasadas", filter: (t) => (t.due_date || '') < todayKey });
