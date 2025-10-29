@@ -31,6 +31,7 @@ let sendNewClientOptionsPage, sendClientsSearchMenu, sendCategoryOptionsPage, se
 let showClientResultsFiltered, showClientResultsByText, sendOrdersByDatePage, sendClientsOrdersPage, sendRecentOrdersPage;
 let searchClientsForSelection, showOrUpdateCartSummary, sendEditClientMenu;
 let fmtDate, trunc;
+let showTasksMenu, startCreateTaskFlow, listTasks, markTaskComplete, deleteTask;
 
 // Constantes importadas
 const PAGE_SIZE = 5;
@@ -53,6 +54,13 @@ function initializeCallbackHandler(dependencies) {
   startNewOrderFlow = dependencies.startNewOrderFlow;
   startNewProductFlow = dependencies.startNewProductFlow;
   startInventoryFlow = dependencies.startInventoryFlow;
+  
+  // Funciones de tareas
+  showTasksMenu = dependencies.showTasksMenu;
+  startCreateTaskFlow = dependencies.startCreateTaskFlow;
+  listTasks = dependencies.listTasks;
+  markTaskComplete = dependencies.markTaskComplete;
+  deleteTask = dependencies.deleteTask;
   
   // Utilidades
   clearState = dependencies.clearState;
@@ -120,6 +128,42 @@ async function handleCallbackQuery(query) {
       await bot.answerCallbackQuery(query.id);
       const url = process.env.WEB_BASE_URL || 'http://localhost:3000';
       return bot.sendMessage(chatId, `Abre la web aquí: ${url}`);
+    }
+    
+    if (data === 'menu:tasks') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return showTasksMenu(chatId);
+    }
+
+    if (data === 'tasks:create') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return startCreateTaskFlow(chatId);
+    }
+
+    if (data === 'tasks:list') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return listTasks(chatId, 'all');
+    }
+
+    if (data === 'tasks:pending') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return listTasks(chatId, 'pending');
+    }
+
+    if (data === 'tasks:completed') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return listTasks(chatId, 'completed');
+    }
+
+    if (data === 'tasks:menu') {
+      clearState(chatId);
+      await bot.answerCallbackQuery(query.id);
+      return showTasksMenu(chatId);
     }
     
     if (data === 'menu:kpis') {
