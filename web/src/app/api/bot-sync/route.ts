@@ -15,22 +15,36 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Validar variables de entorno
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+      return NextResponse.json(
+        { ok: false, error: 'Supabase not configured' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
     if (action === 'stats') {
       // Obtener estadísticas
-      const { count: clientsCount } = await supabase
+      const { count: clientsCount, error: clientsError } = await supabase
         .from('clients')
         .select('*', { count: 'exact', head: true });
 
-      const { count: ordersCount } = await supabase
+      if (clientsError) throw clientsError;
+
+      const { count: ordersCount, error: ordersError } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true });
 
-      const { count: productsCount } = await supabase
+      if (ordersError) throw ordersError;
+
+      const { count: productsCount, error: productsError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true });
+
+      if (productsError) throw productsError;
 
       return NextResponse.json({
         ok: true,
