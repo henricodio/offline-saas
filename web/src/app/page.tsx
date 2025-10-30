@@ -390,7 +390,7 @@ export default async function Home({
       </div>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-xl bg-white p-8 border border-gray-200 shadow-sm">
+      <section className="relative overflow-hidden rounded-xl bg-white dark:bg-gray-800 p-8 border border-gray-200 dark:border-gray-700 shadow-sm">
         {/* Decoración de fondo */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />

@@ -13,6 +13,7 @@ interface SyncStats {
 export default function BotSyncStatus() {
   const [stats, setStats] = useState<SyncStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const fetchStats = async () => {
     try {
@@ -31,8 +32,9 @@ export default function BotSyncStatus() {
       if (data.ok && data.stats) {
         setStats(data.stats);
       }
-    } catch (err) {
-      console.error('Fetch error:', err);
+    } catch (error) {
+      console.log('Bot sync not available:', error);
+      setIsVisible(false);
     } finally {
       setLoading(false);
     }
@@ -43,6 +45,8 @@ export default function BotSyncStatus() {
     const interval = setInterval(fetchStats, 30000); // Actualizar cada 30 segundos
     return () => clearInterval(interval);
   }, []);
+
+  if (!isVisible) return null;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
