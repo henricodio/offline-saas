@@ -6,6 +6,10 @@ import TimeSeriesPanel from "@/components/TimeSeriesPanel";
 import BreakdownsPanel from "@/components/BreakdownsPanel";
 import PendingTasksCard from "@/components/PendingTasksCard";
 import BotSyncStatus from "@/components/BotSyncStatus";
+import QuickStartWidget from "@/components/QuickStartWidget";
+import ActivityTimeline from "@/components/ActivityTimeline";
+import NotificationCenter from "@/components/NotificationCenter";
+import DarkModeToggle from "@/components/DarkModeToggle";
 import { Target, TrendingUp, CheckCircle2, Clock3, Plus, Users, DollarSign, ShoppingCart, Wallet } from "lucide-react";
 
 type OrderRow = {
@@ -420,6 +424,9 @@ export default async function Home({
               <Link href="/tasks" className="btn btn-ghost btn-sm">Tareas</Link>
               <Link href="/mapa" className="btn btn-ghost btn-sm">Mapa</Link>
               <a href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'your_bot_username'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">🤖 Bot</a>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+              <NotificationCenter />
+              <DarkModeToggle />
             </div>
           </div>
         </div>
@@ -630,6 +637,12 @@ export default async function Home({
           </div>
         </Link>
         <PendingTasksCard initialItems={initialPending} />
+      </section>
+
+      {/* Quick Start y Actividad Reciente */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <QuickStartWidget />
+        <ActivityTimeline />
       </section>
 
       {/* Tendencias (series temporales) */}
